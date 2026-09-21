@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/luna1
+    username: root
+    password: test1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100
+        show_sql: true
+        format_sql: true
+        highlight_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+
+logging.level:
+  org.hibernate.SQL: debug
+
+jwt:
+  secret: your-very-very-long-and-secure-secret-key-signature-example-1234567890
+  access-token-expiration-time: 3600000 # 1시간 (밀리초 단위)
+
+
