@@ -1,4 +1,5 @@
-// 컴포넌트 외부에서 라우팅을 조작할 수 있게 도와주는 네비게이터 객체입니다.
+// 컴포넌트 외부에서 라우팅을 조작할 수 있게(react화면을 담당하는 컴포넌트가 아닌 일반 javaScript코드에서 url을 바꾸는것)
+// 도와주는 네비게이터 객체임. useNavigate()는 React Router가 관리하는 React Hook이기 때문에 customHistory를 사용하는것
 export const customHistory = {
   navigate: null,
 
@@ -15,3 +16,14 @@ export const customHistory = {
     }
   }
 };
+
+/* 예를 들어
+    Axios 401 발생
+         ↓
+   axiosConfig.js
+         ↓
+   customHistory.navigate('/login')
+         ↓
+   React Router
+         ↓
+   LoginPage */

@@ -4,10 +4,24 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <title>나의 작은 오렌지나무</title>
   </head>
   <body>
+  <!-- 🌟 핵심: 화면을 그릴 단 하나의 빈 깡통 공간 -->
     <div id="root"></div>
+  <!-- 자바스크립트 번들 파일이 여기서 로드됨
+      브라우저는 이 텅 빈 HTML 파일과 함께, 개발자가 작성한 모든 리액트 컴포넌트와 로직이 압축되어 있는 거대한 자바스크립트 파일(Bundle.js)을 한꺼번에 다운로드-->
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
+
+<!--
+화면이 채워지는 원리(동적 렌더링 원리)
+1.최초 접속 시:
+브라우저는 이 텅 빈 HTML 파일과 함께, 개발자가 작성한 모든 리액트 컴포넌트와 로직이 압축되어 있는 거대한 자바스크립트 파일(Bundle.js)을 한꺼번에 다운로드
+
+2.리액트의 실행:
+브라우저가 자바스크립트를 실행하면서 "아, <div id="root"> 안에다가 로그인 컴포넌트를 그려넣어야지!" 하고 빈 깡통 안을 리액트 컴포넌트로 꽉 채움.
+
+3.페이지 이동 시 (useNavigate):
+  사용자가 로그인을 성공해서 마이페이지로 이동하면, 서버에서 새 HTML을 받아오는 것이 아니라 자바스크립트가 스스로 root <div> 안에 있던 '로그인 컴포넌트'를 통째로 지워버리고(Unmount), 그 자리에 '마이페이지 주문목록 컴포넌트'를 새로 갈아 끼움(Mount). -->
