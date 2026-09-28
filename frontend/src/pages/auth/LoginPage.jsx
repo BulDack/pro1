@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../api/axiosConfig';
+import api from '../api/axiosConfig';
 
 export default function LoginPage() {
   //입력폼 상태 관리
@@ -73,6 +73,7 @@ export default function LoginPage() {
             type="text"
             value={loginId}
             onChange={(e) => setLoginId(e.target.value)}
+            placeholder="아이디를 입력하세요"
             required
             style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
           />
@@ -83,6 +84,7 @@ export default function LoginPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            placeholder="비밀번호를 입력하세요"
             required
             style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
           />
@@ -91,6 +93,12 @@ export default function LoginPage() {
           {isLoading ? '인증 중...' : '로그인'}
         </button>
       </form>
+
+      <div>
+           <Link to="/join">
+                회원가입
+           </Link>
+      </div>
     </div>
   );
 }

@@ -34,6 +34,7 @@ const api = axios.create({
 });
 
 // 2. [요청 인터셉터] 로컬 스토리지(프론트엔트 영역)에 Access Token이 있다면 헤더에 담아서 보냅니다.
+//  api.get()등등과 같은 요청이 실행되면 Axios가 내부적으로 등록해둔 인터셉터를 확인해서 실행
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
