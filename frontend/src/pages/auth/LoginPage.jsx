@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../api/axiosConfig';
+import { useNavigate,Link } from 'react-router-dom';
+import api from '@/api/axiosConfig';
 
 export default function LoginPage() {
   //입력폼 상태 관리
@@ -35,9 +35,10 @@ export default function LoginPage() {
       });
 
       // 2. 앞서 정한 백엔드 공통 응답 포맷(ApiResponse<T>)을 구조 분해 할당으로 파싱
-      const { success, message, data } = response.data;
+      const { success, message, data } = response.data.data;
+      // GlobalExceptionHandler를 통해 에러 발생 시 HTTP 4xx/5xx 상태 코드를 반환하므로,
+      // HTTP 200 OK로 들어온 try 블록 내부에서는 success가 무조건 true
 
-      if (success && data?.accessToken) {
         // 3. 로그인 성공 시 발급받은 JWT(AccessToken)를 브라우저 로컬 스토리지에 보관
         // axiosConfig.js의 인터셉터가 읽어서 요청 헤더(Authorization)에 자동으로 넣어줌.[cite: 1]
         localStorage.setItem('accessToken', data.accessToken);
@@ -45,13 +46,11 @@ export default function LoginPage() {
 
         // 4. 페이지 리로드 없이 리액트 라우터를 이용해 마이페이지/주문목록으로 부드럽게 이동(로그인 성공후 지정된 페이지로 이동)
         navigate('/my-page/orders');
-      } else {
-        // HTTP 상태는 200 OK이나 비즈니스 로직상 실패한 경우 (success: false)[cite: 2]
-        setErrorMessage(message || '로그인에 실패했습니다.');
-      }
+
     } catch (error) {
+      console.error('로그인 실패',error);
       // 백엔드 Custom ExceptionHandler가 반환한 에러 메시지가 있다면 매핑
-      if (error.response && error.response.data) {
+      if (error.response?.data?.message) {
         setErrorMessage(error.response.data.message);
       } else {
         setErrorMessage('서버와의 통신이 원활하지 않습니다.');
@@ -89,7 +88,7 @@ export default function LoginPage() {
             style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
           />
         </div>
-        <button type="submit" disabled={isLoading} style={{ width: '100%', padding: '10px', backgroundColor: '#007bff', color: '#white', border: 'none', cursor: 'pointer' }}>
+        <button type="submit" disabled={isLoading} style={{ width: '100%', padding: '10px', backgroundColor: '#007bff', color: 'white', border: 'none', cursor: 'pointer' }}>
           {isLoading ? '인증 중...' : '로그인'}
         </button>
       </form>

@@ -7,9 +7,9 @@ import {
 import {
     getPost,
     deletePost,
-    likePost,
-    unlikePost
-} from "../api/postApi";
+    //likePost 아직 구현안함
+    //unlikePost 아직 구현안함
+} from "@/api/postApi";
 
 function PostDetail() {
 

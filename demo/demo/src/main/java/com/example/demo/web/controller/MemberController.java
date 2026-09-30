@@ -1,5 +1,6 @@
 package com.example.demo.web.controller;
 
+import com.example.demo.dto.ApiResponse;
 import com.example.demo.dto.JoinRequestDto;
 import com.example.demo.dto.login.LoginDto;
 import com.example.demo.dto.security.PrincipalDetails;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/경로 아직 미설정")
+@RequestMapping("/api/auth")
 public class MemberController {
 
     private final MemberService memberService;
@@ -22,14 +23,14 @@ public class MemberController {
     //회원가입 api
     //ResponseEntitys는 화면에 보여줄 데이터가 없을 때만 쓸 수 있음,
     @PostMapping("/join")
-    public ResponseEntity<String>join(@RequestBody @Valid JoinRequestDto requestDto){
+    public ResponseEntity<ApiResponse<Void>>join(@RequestBody @Valid JoinRequestDto requestDto){
         memberService.joinMember(requestDto);
-        return ResponseEntity.ok("회원가입이 완료되었습니다.");
+        return ResponseEntity.ok(ApiResponse.success("회원가입이 완료되었습니다."));
     }
 
     //로그인 api
     @PostMapping("/login")
-    public ResponseEntity<LoginDto.AccessResponseDto>login(@RequestBody LoginDto.RequestDto requestDto,
+    public ResponseEntity<ApiResponse<LoginDto.AccessResponseDto>>login(@RequestBody LoginDto.RequestDto requestDto,
                                                      HttpServletResponse response){
 
         // 1.서비스에서 로그인 로직 수행 후 토큰 및 회원 정보 생성
@@ -46,13 +47,13 @@ public class MemberController {
         response.addCookie(refreshTokenCookie);
 
         // 4. Access Token만 담은 깔끔한 DTO로 프론트엔드에게 응답 바디 전달
-        LoginDto.AccessResponseDto reponseBody= LoginDto.AccessResponseDto.builder()
+        LoginDto.AccessResponseDto responseBody= LoginDto.AccessResponseDto.builder()
                 .accessToken(responseDto.getAccessToken())
                 .username(responseDto.getUsername())
                 .build();
 
         // 로그인 성공 정보(JSON)와 함께 200 OK 반환
-        return ResponseEntity.ok(reponseBody);
+        return ResponseEntity.ok(ApiResponse.success("로그인이 완료되었습니다.",responseBody));
     }
 
     //로그아웃 api
@@ -60,7 +61,7 @@ public class MemberController {
     //로그아웃할 때는 DB/Redis에서 토큰을 지우는 것뿐만 아니라, 브라우저에 남아있는 쿠키도 같이 만료(삭제)시켜 주어야 함
     //쿠키를 지우는 방법은 의외로 간단한데, 유효기간(MaxAge)을 0으로 세팅한 똑같은 이름의 빈 쿠키를 응답으로 덮어씌워 보내주면 브라우저가 알아서 쿠키를 증발시킴.
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(@AuthenticationPrincipal PrincipalDetails principalDetails,
+    public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal PrincipalDetails principalDetails,
                                        @CookieValue(value = "refreshToken", required = false) String refreshToken,
                                          HttpServletResponse response){ // 👈 쿠키 삭제를 위해 response 필요
 
@@ -77,9 +78,14 @@ public class MemberController {
 
         response.addCookie(deleteCookie);
 
-        return ResponseEntity.ok("로그아웃이 완료되었습니다.");
+        return ResponseEntity.ok(ApiResponse.success("로그아웃이 완료되었습니다."));
     }
 
+    //{
+    //  "success": true,
+    //  "message": "회원가입이 완료되었습니다.",
+    //  "data": null
+    //}회원가입,로그아웃 성공시 반환되는 json
 
 //    @GetMapping(value="/members/new")
 //    public String createForm(Model model){

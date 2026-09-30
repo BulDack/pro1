@@ -29,7 +29,6 @@ public class Post extends BaseEntity {
 
     private Long viewCount;//조회수
 
-    @OneToMany(mappedBy = "postlike",cascade = CascadeType.REMOVE,orphanRemoval = true)
     private Long postLike;// 좋아요 수
 
     @ManyToOne(fetch = FetchType.LAZY)

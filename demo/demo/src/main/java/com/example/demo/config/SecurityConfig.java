@@ -125,7 +125,7 @@ public class SecurityConfig {
 
     //리액트와 연동할때 안켜면 무조건 에러나는 cors 설정 빈 == 여기도 아직 이해못함!!!!!!!
     @Bean
-    private CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // 내 리액트 서버의 주소를 정확히 허용 (포트 번호 주의!)

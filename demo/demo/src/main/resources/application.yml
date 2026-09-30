@@ -7,7 +7,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create
     properties:
       hibernate:
         default_batch_fetch_size: 100
@@ -26,5 +26,6 @@ logging.level:
 jwt:
   secret: your-very-very-long-and-secure-secret-key-signature-example-1234567890
   access-token-expiration-time: 3600000 # 1시간 (밀리초 단위)
+  refresh-token-expiration-time: 604800000 # 7일 (밀리초: 7 * 24 * 60 * 60 * 1000)
 
 

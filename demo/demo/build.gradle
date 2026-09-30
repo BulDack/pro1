@@ -32,6 +32,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     testImplementation 'junit:junit:4.13.1'
     compileOnly 'org.projectlombok:lombok'
@@ -49,4 +51,23 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+// 1. 프론트엔드 빌드 태스크 정의
+task buildReact(type: Exec) {
+	// 윈도우 환경 실행 설정 (cmd /c npm run build)
+	workingDir file("${project.rootDir}/../../frontend")
+	commandLine 'cmd.exe', '/c', 'npm', 'run', 'build'
+}
+
+// 2. 프론트엔드 빌드 결과물(dist)을 Spring Boot static 폴더로 복사
+task copyReactBuild(type: Copy) {
+	dependsOn buildReact
+	from file("${project.rootDir}/../../frontend/dist")
+	into file("${projectDir}/src/main/resources/static")
+}
+
+// 3. Java 컴파일(processResources) 전에 프론트엔드 복사 작업이 먼저 실행되도록 연결
+processResources {
+	dependsOn copyReactBuild
 }

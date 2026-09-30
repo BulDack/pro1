@@ -33,3 +33,4 @@ export const updatePost = async (id, data) => {
 export const deletePost = async (id) => {
     await axios.delete(`${API}/${id}`);
 };
+

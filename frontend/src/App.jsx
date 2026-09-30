@@ -6,11 +6,11 @@ import './App.css'
 import { customHistory } from './customHistory'
 
 // 2. 페이지 파일 경로
-import LoginPage from './pages/LoginPage';
-import Join from './pages/Join';
-import PostList from "./pages/PostList";
-import PostDetail from "./pages/PostDetail";
-import PostCreate from "./pages/PostCreate";
+import LoginPage from './pages/auth/LoginPage';
+import Join from './pages/auth/Join';
+import PostList from "./pages/post/PostList";
+import PostDetail from "./pages/post/PostDetail";
+import PostCreate from "./pages/post/PostCreate";
 
 
 

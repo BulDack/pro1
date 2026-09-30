@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getPosts } from "../api/postApi";
+import { getPosts } from "@/api/postApi";
 import { useNavigate } from "react-router-dom";
 
 //   React

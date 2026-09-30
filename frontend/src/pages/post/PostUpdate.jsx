@@ -7,7 +7,7 @@ import {
 import {
     getPost,
     updatePost
-} from "../api/postApi";
+} from "@/api/postApi";
 
 function PostUpdate() {
 
