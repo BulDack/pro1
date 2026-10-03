@@ -12,7 +12,18 @@ import PostList from "./pages/post/PostList";
 import PostDetail from "./pages/post/PostDetail";
 import PostCreate from "./pages/post/PostCreate";
 
-
+// 임시 HomePage 컴포넌트 (파일이 따로 있다면 import ./pages/... 경로로 대체하세요)
+function HomePage() {
+    return (
+        <div style={{ padding: '20px' }}>
+            <h2>🏠 홈 화면입니다</h2>
+            <nav>
+                <Link to="/login" style={{ marginRight: '10px' }}>[로그인 페이지 이동]</Link>
+                <Link to="/join">[회원가입 페이지 이동]</Link>
+            </nav>
+        </div>
+    );
+}
 
 // 4. Axios 인터셉터와 리액트 라우터를 연결해주는 징검다리
 function HistoryNavigator() {
@@ -41,7 +52,13 @@ function App() {
 
         <Route path="/join" element={<Join />} />
 
+          {/* 게시글 관련 경로 추가 예시 */}
+          <Route path="/posts" element={<PostList />} />
+          <Route path="/posts/:id" element={<PostDetail />} />
+          <Route path="/posts/create" element={<PostCreate />} />
 
+          {/* 정의되지 않은 경로 접근 시 404/홈으로 처리 */}
+          <Route path="*" element={<HomePage />} />
       </Routes>
 
     </BrowserRouter>

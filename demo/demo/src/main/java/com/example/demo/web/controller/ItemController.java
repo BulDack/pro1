@@ -2,7 +2,7 @@ package com.example.demo.web.controller;
 
 
 import com.example.demo.dto.ItemDto;
-import com.example.demo.dto.security.PrincipalDetails;
+import com.example.demo.config.oauth.dto.PrincipalDetails;
 import com.example.demo.dto.condition.ItemSearchCondition;
 import com.example.demo.service.ItemService;
 import jakarta.validation.Valid;

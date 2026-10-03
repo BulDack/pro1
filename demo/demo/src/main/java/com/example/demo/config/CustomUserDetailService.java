@@ -1,7 +1,7 @@
 package com.example.demo.config;
 
-import com.example.demo.dto.security.PrincipalDetails;
-import com.example.demo.dto.security.TokenMemberDto;
+import com.example.demo.config.oauth.dto.PrincipalDetails;
+import com.example.demo.config.oauth.dto.TokenMemberDto;
 import com.example.demo.entity.ennum.Role;
 import com.example.demo.repository.MemberJpaRepository;
 import lombok.RequiredArgsConstructor;

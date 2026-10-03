@@ -14,6 +14,8 @@ public class JoinRequestDto {
 
     private String password;
 
+    private String email;
+
     private String city;
     private String street;
     private String zipcode;

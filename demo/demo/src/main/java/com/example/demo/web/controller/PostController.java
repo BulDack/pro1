@@ -1,20 +1,16 @@
 package com.example.demo.web.controller;
 
-import com.example.demo.dto.PostDto;
-import com.example.demo.dto.security.PrincipalDetails;
+import com.example.demo.config.oauth.dto.PrincipalDetails;
 import com.example.demo.ennum.PostSort;
-import com.example.demo.entity.Post;
 import com.example.demo.service.post.PostLikeService;
 import com.example.demo.service.post.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import static com.example.demo.dto.PostDto.createRequestDto;
@@ -22,8 +18,6 @@ import static com.example.demo.dto.PostDto.updateRequestDto;
 import static com.example.demo.dto.PostDto.postListResponse;
 import static com.example.demo.dto.PostDto.searchRequestDto;
 import static com.example.demo.dto.PostDto.postDetailResponse;
-
-import java.util.List;
 
 //실무에서는 보통 이렇게 나눔
 //상황	            방식

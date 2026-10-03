@@ -1,6 +1,8 @@
-package com.example.demo.config;
+package com.example.demo.config.oauth;
 
-import com.example.demo.dto.security.PrincipalDetails;
+import com.example.demo.config.JwtTokenProvider;
+import com.example.demo.config.oauth.dto.PrincipalDetails;
+import com.example.demo.config.oauth.dto.TokenMemberDto;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,13 +25,15 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         //1.로그인에 성공한 유저 정보(PrincipleDetails)꺼내기
         PrincipalDetails principalDetails=(PrincipalDetails) authentication.getPrincipal();
-
+        TokenMemberDto tokenMemberDto=principalDetails.getTokenMemberDto();
         //2.jwt토큰 생성하기
-        String accessToken= jwtTokenProvider.createAccessToken(
-                principalDetails.getId(),
-                principalDetails.getUsername(),
-                principalDetails.getRole()
-        );
+//        String accessToken= jwtTokenProvider.createAccessToken(
+//                principalDetails.getId(),
+//                principalDetails.getUsername(),
+//                principalDetails.getRole()
+//        );
+        String accessToken=jwtTokenProvider.createAccessToken(tokenMemberDto);
+        String refreshToken =jwtTokenProvider.createRefreshToken(tokenMemberDto.getId(),tokenMemberDto.getMemberId());
 
         //3.클라이언트 페이지로 토큰을 들고 리다이렉트
         // (예: 프론트엔드가 주소창의 쿼리 파라미터에서 토큰을 파싱해서 로컬스토리지에 저장하도록 함)

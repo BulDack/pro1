@@ -1,7 +1,7 @@
 package com.example.demo.web.controller;
 
 
-import com.example.demo.dto.security.PrincipalDetails;
+import com.example.demo.config.oauth.dto.PrincipalDetails;
 import com.example.demo.service.post.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

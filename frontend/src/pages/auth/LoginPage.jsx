@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate,Link } from 'react-router-dom';
-import api from '@/api/axiosConfig';
+import api from '@/services/api.js';
 
 export default function LoginPage() {
   //입력폼 상태 관리

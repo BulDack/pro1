@@ -18,7 +18,11 @@ public interface CartItemRepository extends JpaRepository<CartItem,Long> {
 
     Optional<CartItem> findByCartIdAndItemId(Long cartId, Long itemId);
 
-    List<CartItem> findAllByIdInAndUserId(List<Long> cartItemId,Long memberId);
+    @Query("select ci from CartItem ci " +
+            "join ci.cart c " +
+            "where ci.id in : ids and c.member.id= :memberId")
+    List<CartItem> findAllByIdInAndUserId(@Param("ids") List<Long>ids,
+                                          @Param("memberId")Long memberId);
 
     // 사용자의 장바구니에 속한 지정된 ID 목록의 아이템들을 한 번에 삭제
     @Modifying(clearAutomatically = true) //Spring Data JPA에서 UPDATE, DELETE 같은 변경 쿼리를 실행한 후 영속성 컨텍스트를 자동으로 비워주는 옵션(값이 업데이트 되고 나면 실제 db랑 영속성 컨텍스트랑 다를수 있기때문)

@@ -1,10 +1,10 @@
-package com.example.demo.config;
+package com.example.demo.config.oauth;
 
-import com.example.demo.dto.security.TokenMemberDto;
+import com.example.demo.config.oauth.dto.OAuth2Attributes;
+import com.example.demo.config.oauth.dto.TokenMemberDto;
 import com.example.demo.entity.Member;
 import com.example.demo.repository.MemberJpaRepository;
-import com.example.demo.dto.security.OAuth2Attributes;
-import com.example.demo.dto.security.PrincipalDetails;
+import com.example.demo.config.oauth.dto.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -46,9 +46,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         Member member=saveOrUpdate(attributes);
 
         // 6. ⭐️ Entity -> DTO 변환
-        TokenMemberDto tokenMemberDto=new TokenMemberDto(member.getId(), member.getLoginId(), member.getRole());
+        TokenMemberDto tokenMemberDto=TokenMemberDto.from(member);
 
-        // 7. DTO를 PrincipalDetails에 담아서 반환
+        // 7. DTO를 PrincipalDetails에 담아서 반환(SuccessHandler로 넘겨주기위해)
         return new PrincipalDetails(tokenMemberDto,attributes.getAttributes());
 
 

@@ -3,7 +3,7 @@ package com.example.demo.web.controller;
 import com.example.demo.dto.ApiResponse;
 import com.example.demo.dto.JoinRequestDto;
 import com.example.demo.dto.login.LoginDto;
-import com.example.demo.dto.security.PrincipalDetails;
+import com.example.demo.config.oauth.dto.PrincipalDetails;
 import com.example.demo.service.MemberService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;

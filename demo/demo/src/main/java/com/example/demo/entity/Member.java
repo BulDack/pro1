@@ -1,6 +1,7 @@
 package com.example.demo.entity;
 
 import com.example.demo.dto.JoinRequestDto;
+import com.example.demo.entity.ennum.Provider;
 import com.example.demo.entity.ennum.Role;
 import com.example.demo.entity.item.Cart;
 import jakarta.persistence.*;
@@ -37,7 +38,7 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    private String provider;    // google, kakao 등
+    private Provider provider;    // google, kakao 등
     private String providerId;  // 외부 서비스의 고유 유저 ID
 
     @Embedded
@@ -60,7 +61,7 @@ public class Member {
     }
 
     @Builder //빌더를 메서드 단위에 놓으면 원하는 필드로만 구성할수 있음
-    public Member(String email, String username, String provider, String providerId, Role role) {
+    public Member(String email, String username, Provider provider, String providerId, Role role) {
         this.email = email;
         this.username = username;
         this.provider = provider;

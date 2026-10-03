@@ -1,9 +1,10 @@
-package com.example.demo.dto.security;
+package com.example.demo.config.oauth.dto;
 
 
-//member엔티티를 갖고있으면서 스프링시큐리티가 이해할수 있게 UserDetails,OAuth2User를 동시구현
+//member엔티티(대신에 안전한 dto)를 갖고있으면서 스프링시큐리티가 이해할수 있게 UserDetails,OAuth2User를 동시구현
 
 import com.example.demo.entity.ennum.Role;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 public class PrincipalDetails implements UserDetails, OAuth2User {
 
+    @Getter
     private final TokenMemberDto tokenMemberDto;
     private Map<String,Object>attributes; //소셜로그인에서 받은 정보
 
@@ -88,6 +90,5 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
     }
 
     public Role getRole(){ return tokenMemberDto.getRole(); }
-
 
 }

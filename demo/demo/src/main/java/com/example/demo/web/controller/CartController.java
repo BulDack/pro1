@@ -1,7 +1,7 @@
 package com.example.demo.web.controller;
 
 import com.example.demo.dto.CartItemDto;
-import com.example.demo.dto.security.PrincipalDetails;
+import com.example.demo.config.oauth.dto.PrincipalDetails;
 import com.example.demo.service.CartService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

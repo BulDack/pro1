@@ -2,8 +2,7 @@ package com.example.demo.web.controller;
 
 import com.example.demo.dto.CartItemDto;
 import com.example.demo.dto.OrderDto;
-import com.example.demo.dto.security.PrincipalDetails;
-import com.example.demo.dto.Result;
+import com.example.demo.config.oauth.dto.PrincipalDetails;
 import com.example.demo.service.ItemService;
 import com.example.demo.service.MemberService;
 import com.example.demo.service.OrderQueryService;
@@ -53,7 +52,7 @@ public class OrderController {
 
     //내 주문목록 조회
     @GetMapping("/orders")
-    public Result getMyOrders(
+    public ResponseEntity<Page<OrderDto.Response>>getMyOrders(
             @AuthenticationPrincipal PrincipalDetails userDetails, //인증된 토큰에서 로그인한 유저 정보를 안전하게 꺼냄
             @ModelAttribute("orderSearch") OrderSearch orderSearch,
             Pageable pageable
@@ -64,7 +63,8 @@ public class OrderController {
 
         Page<OrderDto.Response> orders= orderQueryService.searchOrders(orderSearch,pageable);
 
-//        List<OrderDto.Response>result= orders.stream()
+//        Result<List<OrderDto.Response>>result=new Result<>(orders.getContent().size(),orders.getContent());
+//      List<OrderDto.Response>result= orders.stream()
 //                .map(OrderDto.Response::new)
 //                .collect(Collectors.toList());
 
@@ -75,7 +75,7 @@ public class OrderController {
         //이 문제를 아주 우아하게 해결하기 위해, 자바 객체(배열)를 한 번 더 감싸줄 Result라는 클래스를 우리가 직접 선언해서 쓴 것.
 
 
-        return new Result(orders.getSize(),orders.getContent());//---------이거 아직 잘모른채 했음 다음에 바로 알아보기!!!!!
+        return ResponseEntity.ok(orders);//---------이거 아직 잘모른채 했음 다음에 바로 알아보기!!!!!
     }
 
     //주문취소

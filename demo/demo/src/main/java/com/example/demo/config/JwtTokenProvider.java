@@ -1,5 +1,6 @@
 package com.example.demo.config;
 
+import com.example.demo.config.oauth.dto.TokenMemberDto;
 import com.example.demo.entity.Member;
 import com.example.demo.entity.ennum.Role;
 import io.jsonwebtoken.Claims;
@@ -64,6 +65,25 @@ public class JwtTokenProvider {
                 .expiration(validity)
                 .signWith(secretKey, Jwts.SIG.HS256)
                 .compact();
+    }
+    //매개변수가 TokenMemberDto인 버전
+    public String createAccessToken(TokenMemberDto tokenMemberDto){
+        Claims claims = Jwts.claims()
+                .subject(tokenMemberDto.getMemberId())
+                .add("id", tokenMemberDto.getId())
+                .add("role", tokenMemberDto.getRole())
+                .build();
+
+        Date now = new Date();
+        Date validity = new Date(now.getTime() + accessTokenExpirationTime);
+
+        return Jwts.builder()
+                .claims(claims)
+                .issuedAt(now)
+                .expiration(validity)
+                .signWith(secretKey, Jwts.SIG.HS256)
+                .compact();
+
     }
 
     public String createAccessToken(Member member){

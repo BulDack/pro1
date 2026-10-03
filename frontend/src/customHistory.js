@@ -21,7 +21,7 @@ export const customHistory = {
 /* 예를 들어
     Axios 401 발생
          ↓
-   axiosConfig.js
+   api.js
          ↓
    customHistory.navigate('/login')
          ↓
