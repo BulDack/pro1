@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate,Link } from 'react-router-dom';
-import api from '@/services/api.js';
+import { useAuth } from '@/context/AuthContext'; // 1. 전역 인증 관리를 위한 useAuth Hook 불러오기
 
 export default function LoginPage() {
   //입력폼 상태 관리
@@ -11,6 +11,9 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
+
+  // AuthContext에서 전역 login 함수 가져오기 (메모리 상태 업데이트 담당)
+  const {login} =useAuth();
 
   //===폼 제출 핸들러
   const handleLoginSubmit = async (e) => {
@@ -27,24 +30,11 @@ export default function LoginPage() {
     setErrorMessage('');
 
     try {
-      // 1. JSON 방식으로 백엔드 서버에 로그인 요청을 보냄 (@RequestBody LoginRequestDto 매핑)
-      // withCredentials: true로 인해 RefreshToken 쿠키는 브라우저가 자동 수신
-      const response = await api.post('/api/auth/login', {
-        loginId: loginId,
-        password: password
-      });
+      // AuthContext의 login 함수 실행
+      // (내부적으로 authApi.js를 호출하고, 수신한 AccessToken을 JS 메모리 State에 저장함)
+      await login(loginId,password);
 
-      // 2. 앞서 정한 백엔드 공통 응답 포맷(ApiResponse<T>)을 구조 분해 할당으로 파싱
-      const { success, message, data } = response.data.data;
-      // GlobalExceptionHandler를 통해 에러 발생 시 HTTP 4xx/5xx 상태 코드를 반환하므로,
-      // HTTP 200 OK로 들어온 try 블록 내부에서는 success가 무조건 true
-
-        // 3. 로그인 성공 시 발급받은 JWT(AccessToken)를 브라우저 로컬 스토리지에 보관
-        // axiosConfig.js의 인터셉터가 읽어서 요청 헤더(Authorization)에 자동으로 넣어줌.[cite: 1]
-        localStorage.setItem('accessToken', data.accessToken);
-        localStorage.setItem('username', data.username);
-
-        // 4. 페이지 리로드 없이 리액트 라우터를 이용해 마이페이지/주문목록으로 부드럽게 이동(로그인 성공후 지정된 페이지로 이동)
+        // 페이지 리로드 없이 리액트 라우터를 이용해 마이페이지/주문목록으로 부드럽게 이동(로그인 성공후 지정된 페이지로 이동)
         navigate('/my-page/orders');
 
     } catch (error) {

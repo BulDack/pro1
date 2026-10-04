@@ -12,7 +12,9 @@ import api from '../services/api';
 export const loginApi = async (loginId, password) => {
   try {
     const response = await api.post('/api/auth/login', { loginId, password });
-      return response.data; //백엔드에서 넘겨준 json 데이터 반환
+      return response.data.data; //백엔드에서 넘겨준 json 데이터 반환
+    // 백엔드 공통 응답 포맷 (ApiResponse<T>) 파싱
+    // response.data = { success: true, message: "...", data: { accessToken: "...", username: "..." } }
     }catch(error){
       // Axios 에러 객체에서 백엔드가 보낸 에러 메시지 추출 및 예외 던지기
       const errorMessage=error.response?.data?.message || '로그인에 실패했습니다.';
