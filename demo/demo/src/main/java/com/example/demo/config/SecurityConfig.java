@@ -84,7 +84,7 @@ public class SecurityConfig {
                 // URL별 접근 권한 설정 (🔥 주소 앞에 '/' 추가 필수!)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/admin/**").hasRole("ADMIN") //이주소는 관리자만
-                        .requestMatchers("/api/auth/login", "/api/auth/join").permitAll()// 'api/...' -> '/api/...'로 수정
+                        .requestMatchers("/api/auth/login", "/api/auth/join","/uploads/**","api/auth/refresh").permitAll()// 'api/...' -> '/api/...'로 수정
                         .anyRequest().authenticated())
 
                 //소셜로그인 설정

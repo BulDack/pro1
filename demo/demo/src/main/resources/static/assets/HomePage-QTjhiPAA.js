@@ -1,0 +1,1 @@
+import{n as e,t}from"./jsx-runtime-n5LQ9ujS.js";e();var n=t(),r=()=>(0,n.jsxs)(`div`,{children:[(0,n.jsx)(`h1`,{children:`메인 페이지`}),(0,n.jsx)(`p`,{children:`누구나 접근 가능한 공개 페이지입니다.`})]});export{r as default};

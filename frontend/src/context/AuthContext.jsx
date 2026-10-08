@@ -33,7 +33,7 @@ export const AuthProvider = ({children}) =>{
     const refreshAccessToken = useCallback(async () => {
         try {
             // HttpOnly 쿠키 기반으로 백엔드에 새 Access Token 요청
-            const response = await axios.post('/api/auth/refresh', {}, { withCredentials: true });
+            const response = await axios.post('http://localhost:8080/api/auth/refresh', {}, { withCredentials: true });
             setAccessToken(response.data.accessToken);
         } catch (error) {
             setAccessToken(null);

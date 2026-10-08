@@ -135,13 +135,31 @@ public class JwtTokenProvider {
                 .signWith(secretKey,Jwts.SIG.HS256)
                 .compact();
     }
+
     /**
      * [오버로딩 편의 메서드] Member 엔티티 기반 토큰 생성 (일반 로그인 서비스용)
      */
     public String createRefreshToken(Member member) {
+
         return createRefreshToken(member.getId(), member.getLoginId());
     }
 
+    //authService에서 쓰는 메서드
+    public String createRefreshToken(String memberId) {
+        Claims claims = Jwts.claims()
+                .subject(memberId) // PK 값 저장
+                .build();
+
+        Date now = new Date();
+        Date validity = new Date(now.getTime() + refreshTokenExpirationTime);
+
+        return Jwts.builder()
+                .claims(claims)
+                .issuedAt(now)
+                .expiration(validity)
+                .signWith(secretKey, Jwts.SIG.HS256)
+                .compact();
+    }
 
     //토큰에서 유저 loginId(subject)추출
     public String getLoginId(String token){
@@ -152,6 +170,15 @@ public class JwtTokenProvider {
                     .parseSignedClaims(token)
                     .getPayload()
                     .getSubject();
+    }
+    public String getId(String token){
+
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getId();
     }
 
     public Claims getClaims(String token){

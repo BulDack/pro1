@@ -84,7 +84,7 @@ api.interceptors.request.use(
 
 // 3. [응답 인터셉터] (401 발생시 silent refresh 및 예외 처리)
 api.interceptors.response.use(
-  (response) => response,
+  (response) => response.data,
   async (error) => {
       const originalRequest=error.config;
 
@@ -125,19 +125,19 @@ api.interceptors.response.use(
                 .catch((err) => Promise.reject(err));
         }
 
-        // 정상 흐름: 401 감지 시 Silent Refresh 시도
+        // 정상 흐름: 401 감지 시 Silent Refresh(Silent Refresh(지속적/무소음 토큰 재발급)는 SPA(React) 환경에서 사용자가 웹사이트를 이용하는 동안 로그인 세션이 끊기지 않도록 사용자 모르게 백그라운드에서 Access Token을 자동으로 재발급받는 기술 및 인증 흐름) 시도
         originalRequest._retry = true;
         isRefreshing = true;
 
         try {
             // HttpOnly 쿠키에 저장된 Refresh Token을 이용해 백엔드에 새 Access Token 요청
             const response = await axios.post(
-                '/api/auth/refresh',
+                'http://localhost:8080/api/auth/refresh',
                 {},
                 { withCredentials: true } // Refresh Token 쿠키 전달
             );
 
-            const { accessToken: newAccessToken } = response.data;
+            const newAccessToken=response.data.data.accessToken;
 
             // 1. 메모리(AuthContext State)의 Access Token 업데이트
             if (updateAccessTokenInMemory) {

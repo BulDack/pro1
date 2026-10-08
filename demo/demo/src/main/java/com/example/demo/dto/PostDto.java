@@ -1,6 +1,6 @@
 package com.example.demo.dto;
 
-import com.example.demo.entity.Post;
+import com.example.demo.entity.Post.Post;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;

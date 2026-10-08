@@ -1,7 +1,7 @@
 package com.example.demo.service.post;
 
 import com.example.demo.ennum.PostSort;
-import com.example.demo.entity.Post;
+import com.example.demo.entity.Post.Post;
 import com.example.demo.entity.Member;
 import com.example.demo.repository.post.PostQueryRepository;
 import com.example.demo.repository.post.PostRepository;
@@ -17,8 +17,6 @@ import static com.example.demo.dto.PostDto.updateRequestDto;
 import static com.example.demo.dto.PostDto.searchRequestDto;
 import static com.example.demo.dto.PostDto.postListResponse;
 import static com.example.demo.dto.PostDto.postDetailResponse;
-
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)

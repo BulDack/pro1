@@ -2,6 +2,7 @@ package com.example.demo.repository.post;
 
 
 import com.example.demo.dto.PostDto;
+import com.example.demo.dto.home.PostSummaryResponse;
 import com.example.demo.ennum.PostSort;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
@@ -23,6 +24,7 @@ import java.util.List;
 import static com.example.demo.entity.QPost.post;
 import static com.example.demo.entity.QPostLike.postLike;
 import static com.example.demo.entity.QMember.member;
+import static com.example.demo.entity.item.QItemImage.itemImage;
 import static com.example.demo.dto.PostDto.searchRequestDto;
 import static com.example.demo.dto.PostDto.postDetailResponse;
 import static com.example.demo.dto.PostDto.postListResponse;
@@ -114,6 +116,7 @@ public class PostQueryRepository {
                         postLike.count().as("likeCount"),
                         post.member.loginId,
                         post.createdDate
+                        //여기에 nickname도 넣어줘야 함
                 ))
                 .from(post)
                 .join(post.member,member)
@@ -135,6 +138,47 @@ public class PostQueryRepository {
         return PageableExecutionUtils.getPage(content,pageable,countQuery::fetchOne);
 
     }
+
+    //
+    public List<PostSummaryResponse> findPopularPosts(int limit) {
+        return queryFactory
+                .select(
+                        Projections.constructor(
+                                PostSummaryResponse.class,
+                                post.id,
+                                post.title,
+                                post.member.nickname,
+                                post.viewCount,
+                                post.likeCount
+
+                        )
+                )
+                .from(post) //연관관계가 맺어 잇어서 자동으로도 조인되지만,명확하게 조인을 제어하기 위해 직접씀
+                .join(post.member, member)
+                .orderBy(post.viewCount.desc())
+                .limit(limit)
+                .fetch();
+    }
+
+    public List<PostSummaryResponse> findNewPosts(int limit) {
+
+        return queryFactory
+                .select(
+                        Projections.constructor(
+                                PostSummaryResponse.class,
+                                post.id,
+                                post.title,
+                                post.member.nickname,
+                                post.viewCount,
+                                post.likeCount
+                        )
+                ).from(post)
+                .join(post.member,member)
+                .orderBy(post.createdDate.desc())
+                .limit(limit)
+                .fetch();
+    }
+
 
     //제목 2글자 이상으로 검색
     private BooleanExpression titleContains(String keyword){
@@ -202,4 +246,7 @@ public class PostQueryRepository {
             };
         };
     }
+
+
+
 }

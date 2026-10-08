@@ -17,7 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import static com.example.demo.dto.ItemDto.Response;
+//import static com.example.demo.dto.ItemDto.Response;
 import static com.example.demo.dto.ItemDto.UpdateRequest;
 
 @RestController
@@ -43,11 +43,11 @@ public class ItemController {
     //상품전체조회(권한 없음 - 비회원도 가능)
     //* SecurityConfig에서 /api/items는 permitAll()로 열어두기!!!!
     @GetMapping
-    public ResponseEntity<Page<Response>>getItems(
+    public ResponseEntity<Page<ItemDto.ItemListResponse>>getItems(
             ItemSearchCondition condition,
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ){
-        Page<Response> items=itemService.findAllItems(condition,pageable);
+        Page<ItemDto.ItemListResponse> items=itemService.findAllItems(condition,pageable);
         return ResponseEntity.ok(items);
     }
 
@@ -59,19 +59,19 @@ public class ItemController {
     //상품 단건 상세조회
     //* SecurityConfig에서 /api/items는 permitAll()로 열어두기!!!!
     @GetMapping("/{itemId}")
-    public ResponseEntity<Response>getItem(@PathVariable Long itemId){
-        Response item=itemService.findById(itemId);
+    public ResponseEntity<ItemDto.ItemResponse>getItem(@PathVariable Long itemId){
+        ItemDto.ItemResponse item=itemService.findById(itemId);
         return ResponseEntity.ok(item);
     }
 
     //상품수정(관리자만 가능)
     @PutMapping("/{itemId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Response>updateItem(
+    public ResponseEntity<ItemDto.ItemResponse>updateItem(
             @PathVariable Long itemId,
             @Valid @RequestBody UpdateRequest requestDto  //다음에 할때 valid 검색해서 정리하기!!!!
     ){
-        Response updateItem=itemService.updateItem(itemId,requestDto);
+        ItemDto.ItemResponse updateItem=itemService.updateItem(itemId,requestDto);
         return ResponseEntity.ok(updateItem);
     }
 

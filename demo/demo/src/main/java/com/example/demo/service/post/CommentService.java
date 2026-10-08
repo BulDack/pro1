@@ -1,9 +1,9 @@
 package com.example.demo.service.post;
 
 
-import com.example.demo.entity.Comment;
+import com.example.demo.entity.Post.Comment;
 import com.example.demo.entity.Member;
-import com.example.demo.entity.Post;
+import com.example.demo.entity.Post.Post;
 import com.example.demo.repository.post.CommentRepository;
 import com.example.demo.repository.MemberJpaRepository;
 import com.example.demo.repository.post.PostRepository;

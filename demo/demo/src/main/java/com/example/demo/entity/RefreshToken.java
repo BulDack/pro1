@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -21,10 +23,13 @@ public class RefreshToken {
     private String token;
 
     @Column(nullable = false)
-    private long memberId;  //연관관계 매핑대신 성능과 결합도를 낮추기 위해 id값만 저장
+    private long memberId;  //연관관계 매핑대신 성능과 결합도를 낮추기 위해 id(pk)값만 저장
 
     @Column(nullable = false)
     public boolean isUsed; // RTR정책 :이미 사용된 토큰인지 여부
+
+    @Column(nullable = false)
+    public LocalDateTime expiryDate;
 
     @Builder
     public RefreshToken(String token,Long memberId,boolean isUsed){
@@ -36,5 +41,11 @@ public class RefreshToken {
     // 토큰 사용 완료 처리 (더티 체킹용)
     public void changeToUsed(){
         this.isUsed=true;
+    }
+
+    //[RTR핵심] 기존엔티티의 토큰과 만료일을 업데이트 하는 편의 메서드
+    public void updateToken(String newToken,LocalDateTime newExpiryDate){
+        this.token=newToken;
+        this.expiryDate=newExpiryDate;
     }
 }

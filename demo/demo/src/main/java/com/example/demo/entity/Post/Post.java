@@ -1,6 +1,7 @@
-package com.example.demo.entity;
+package com.example.demo.entity.Post;
 
 
+import com.example.demo.entity.Member;
 import com.example.demo.entity.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,7 +30,7 @@ public class Post extends BaseEntity {
 
     private Long viewCount;//조회수
 
-    private Long postLike;// 좋아요 수
+    private Long likeCount;// 좋아요 수
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name= "member_id",nullable = false)

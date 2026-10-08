@@ -2,8 +2,6 @@ package com.example.demo.repository.order;
 
 
 import com.example.demo.dto.OrderDto;
-import com.example.demo.entity.Order;
-import com.example.demo.entity.QOrder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;

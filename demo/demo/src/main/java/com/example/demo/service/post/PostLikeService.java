@@ -2,8 +2,8 @@ package com.example.demo.service.post;
 
 
 import com.example.demo.entity.Member;
-import com.example.demo.entity.Post;
-import com.example.demo.entity.PostLike;
+import com.example.demo.entity.Post.Post;
+import com.example.demo.entity.Post.PostLike;
 import com.example.demo.repository.MemberJpaRepository;
 import com.example.demo.repository.post.PostLikeRepository;
 import com.example.demo.repository.post.PostRepository;

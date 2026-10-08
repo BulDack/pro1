@@ -1,6 +1,6 @@
 package com.example.demo.repository.post;
 
-import com.example.demo.entity.Comment;
+import com.example.demo.entity.Post.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

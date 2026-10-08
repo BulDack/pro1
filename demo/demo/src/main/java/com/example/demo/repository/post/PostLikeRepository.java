@@ -1,6 +1,6 @@
 package com.example.demo.repository.post;
 
-import com.example.demo.entity.PostLike;
+import com.example.demo.entity.Post.PostLike;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

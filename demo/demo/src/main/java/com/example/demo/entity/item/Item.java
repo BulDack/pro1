@@ -36,6 +36,7 @@ public class Item extends BaseEntity {
     private int price;
     private int stockQuantity;
     private String description;
+    private String thumbnailUrl;
 
     @Enumerated(EnumType.STRING)
     private ItemStatus status= ItemStatus.ACTIVE; //초기값은 활성상태
@@ -109,6 +110,7 @@ public class Item extends BaseEntity {
     public void changeStatus(ItemStatus status){
         this.status=status;
     }
+    public void changeThumbnailUrl(String ThumbnailUrl){ this.thumbnailUrl=thumbnailUrl;}
 
 
 }

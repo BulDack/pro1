@@ -1,0 +1,1 @@
+import{n as e,t}from"./jsx-runtime-n5LQ9ujS.js";e();var n=t();function r(){return(0,n.jsxs)(`div`,{children:[(0,n.jsx)(`h1`,{children:`마이 페이지`}),(0,n.jsx)(`p`,{children:`jwt 인증에 성공한 유저만 들어올 수 있는 보안 페이지 입니다.`})]})}export{r as default};

@@ -27,6 +27,7 @@ import java.io.IOException;
 //JWT 방식: 로그인 시점에만 토큰 발급용으로 CustomOAuth2UserService를 사용하고, 이후 요청은 JwtAuthenticationFilter가 JWT 토큰 복원만으로 TokenMemberDto와 PrincipalDetails를 재구성함.
 @RequiredArgsConstructor
 @Component
+//일반 요청의 access token을 검증하는 용도!
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;

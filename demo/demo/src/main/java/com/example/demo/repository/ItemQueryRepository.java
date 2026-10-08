@@ -2,8 +2,9 @@ package com.example.demo.repository;
 
 import com.example.demo.dto.ItemDto;
 import com.example.demo.dto.condition.ItemSearchCondition;
+import com.example.demo.dto.home.ItemSummaryResponse;
 import com.example.demo.ennum.SearchOperator;
-import com.example.demo.entity.QItemCategory;
+import com.example.demo.entity.ennum.OrderStatus;
 import com.example.demo.entity.item.Item;
 import com.example.demo.entity.item.QItemSearchAttribute;
 import com.querydsl.core.types.Expression;
@@ -21,15 +22,20 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-import static com.example.demo.dto.ItemDto.Response;
+import static com.example.demo.dto.ItemDto.ItemListResponse;
 import static com.example.demo.entity.QItemCategory.itemCategory;
-import static com.example.demo.entity.QOrder.order;
 import static com.example.demo.entity.item.QItem.item;
+import static com.example.demo.entity.QOrder.order;
+import static com.example.demo.entity.QOrderItem.orderItem;
+
+
 
 import static com.example.demo.ennum.SearchOperator.GOE;
-import static com.example.demo.entity.item.QItem.item;
+
 
 @Repository
 @RequiredArgsConstructor
@@ -37,15 +43,16 @@ public class ItemQueryRepository {
 
     private final JPAQueryFactory queryFactory;
 
-    public Page<Response> searchItems(ItemSearchCondition cond,List<Long>categoryIds, Pageable pageable){
+    public Page<ItemListResponse> searchItems(ItemSearchCondition cond,List<Long>categoryIds, Pageable pageable){
 
         //1.실제 데이터 조회 쿼리
-        List<Response> content=queryFactory
+        List<ItemListResponse> content=queryFactory
                 .select(Projections.fields(
-                        Response.class,
+                        ItemListResponse.class,
                         item.id,
                         item.name,
                         item.price
+                        //itemImage.imageUrl
                 ))
                 .from(item)
                 //// Item과 Category가 ItemCategory(다대다 중간 엔티티)로 연결된 경우 조인
@@ -86,6 +93,53 @@ public class ItemQueryRepository {
          return PageableExecutionUtils.getPage(content,pageable,countQuery::fetchOne);
 
     }
+
+    public List<ItemSummaryResponse> findPopularItems(int limit) {
+
+        LocalDateTime sevenDaysAgo =
+                LocalDateTime.now().minusDays(7);
+
+        return queryFactory
+                .select(Projections.constructor(ItemSummaryResponse.class,
+                        item.id,
+                        item.name,
+                        item.price,
+                        item.thumbnailUrl))
+                .from(orderItem)
+                //orderItem이 어떤상품인지 정보를 알기위해 item과 이너조인
+                .join(orderItem.item,item)
+                //최근 7일주문인지 확인하려면 order의 주문일시가 필요
+                .join(orderItem.order,order)
+                .where(order.orderdate.goe(sevenDaysAgo),
+                        order.status.eq(OrderStatus.COMPLETE))
+                .groupBy(
+                        item.id,
+                        item.name,
+                        item.price,
+                        item.thumbnailUrl
+                )
+                .orderBy(orderItem.count.sum().asc())
+                .limit(limit)
+                .fetch();
+
+
+    }
+
+    public List<ItemSummaryResponse> findNewItems(int limit) {
+
+        return queryFactory
+                .select(Projections.constructor(ItemSummaryResponse.class,
+                        item.id,
+                        item.name,
+                        item.price,
+                        item.thumbnailUrl))
+                .from(item)
+                .orderBy(item.createdDate.desc())
+                .limit(limit)
+                .fetch();
+
+    }
+
 
     private BooleanExpression categoryIn(List<Long> categoryIds) {
         return (categoryIds !=null && !categoryIds.isEmpty())
@@ -153,6 +207,8 @@ public class ItemQueryRepository {
             default: return item.id.desc();
         }
     }
+
+
 
 
     //꿀팁 1: null이 절대 안 들어오는 필수 조건은 where에 바로 쓰기

@@ -79,14 +79,22 @@ public final class ItemDto {
     }
 
     // 3. 상품 목록 조회 응답 DTO
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Response{
-        private Long id;
-        private String name;
-        private Integer price;
+    public record ItemListResponse(
+            Long id,
+            String name,
+            int price,
+            List<String> imageUrls
+    ) {
     }
+
+    //상품 단건 조회 응답 dto
+    public record ItemResponse(
+            Long id,
+            String name,
+            int price
+    ) {
+    }
+
 
     @Getter
     @NoArgsConstructor

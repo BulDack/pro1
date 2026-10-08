@@ -1,5 +1,6 @@
-package com.example.demo.entity;
+package com.example.demo.entity.Post;
 
+import com.example.demo.entity.Member;
 import com.example.demo.entity.base.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -28,7 +29,7 @@ public class Comment extends BaseTimeEntity {
     private Member member;
 
     @Builder
-    public Comment(String content,Post post,Member member){
+    public Comment(String content, Post post, Member member){
         this.content=content;
         this.post=post;
         this.member=member;

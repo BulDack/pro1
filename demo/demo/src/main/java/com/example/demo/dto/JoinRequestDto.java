@@ -10,6 +10,8 @@ public class JoinRequestDto {
     @NotEmpty(message = "회원이름은 필수입니다.")
     private String username;
 
+    private String nickname;
+
     private String loginId;
 
     private String password;

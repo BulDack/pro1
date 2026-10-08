@@ -35,7 +35,7 @@ export default function LoginPage() {
       await login(loginId,password);
 
         // 페이지 리로드 없이 리액트 라우터를 이용해 마이페이지/주문목록으로 부드럽게 이동(로그인 성공후 지정된 페이지로 이동)
-        navigate('/my-page/orders');
+        navigate('/my-page/');
 
     } catch (error) {
       console.error('로그인 실패',error);

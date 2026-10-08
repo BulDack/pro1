@@ -1,6 +1,7 @@
-package com.example.demo.entity;
+package com.example.demo.entity.Post;
 
 
+import com.example.demo.entity.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -34,7 +35,7 @@ public class PostLike {
     private Post post;
 
     @Builder
-    public PostLike(Member member,Post post){
+    public PostLike(Member member, Post post){
         this.member=member;
         this.post=post;
     }

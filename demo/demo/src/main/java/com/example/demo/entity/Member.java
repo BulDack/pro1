@@ -29,6 +29,8 @@ public class Member {
 
     private String username;
 
+    private String nickname;
+
     private String email;
 
     private String loginId;
@@ -53,6 +55,7 @@ public class Member {
     public static Member createMember(JoinRequestDto form, Address address, Role role){
         Member member =new Member();
         member.username=form.getUsername();
+        member.nickname=form.getNickname();
         member.password=form.getPassword();
         member.loginId=form.getLoginId();
         member.address=address;
@@ -60,14 +63,14 @@ public class Member {
         return member;
     }
 
-    @Builder //빌더를 메서드 단위에 놓으면 원하는 필드로만 구성할수 있음
-    public Member(String email, String username, Provider provider, String providerId, Role role) {
-        this.email = email;
-        this.username = username;
-        this.provider = provider;
-        this.providerId = providerId;
-        this.role = role;
-    }
+//    @Builder //빌더를 메서드 단위에 놓으면 원하는 필드로만 구성할수 있음
+//    public Member(String email, String username, Provider provider, String providerId, Role role) {
+//        this.email = email;
+//        this.username = username;
+//        this.provider = provider;
+//        this.providerId = providerId;
+//        this.role = role;
+//    }
 
     public Member update(String name){
         this.username=name;

@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
-import static com.example.demo.dto.ItemDto.Response;
+//mport static com.example.demo.dto.ItemDto.ItemListResponse.;
 
 @Service
 @RequiredArgsConstructor
@@ -48,7 +48,7 @@ public class ItemService {
     }
     //상품 정보 수정
     @Transactional
-    public Response updateItem(Long itemId,ItemDto.UpdateRequest request){
+    public ItemDto.ItemResponse updateItem(Long itemId,ItemDto.UpdateRequest request){
         Item item=itemRepository.findById(itemId).orElseThrow(()->new EntityNotFoundException("상품을 찾을수 없습니다"));
         //엔티티 내부 메서드를 통한 더티체킹 수정
         item.changeItem(request.getName(),request.getPrice());
@@ -57,18 +57,18 @@ public class ItemService {
         //2.정확성: 데이터가 무조건 깔끔하게 최신 상태로 동기화됩니다.
         item.updateAttributes(request.toAttributeEntries(item));
 
-        return new Response(item.getId(),item.getName(),item.getPrice());
+        return new ItemDto.ItemResponse(item.getId(),item.getName(),item.getPrice());
 
     }
 
     //상품 단건 조회할때 쓰임
-    public Response findById(Long itemId){
+    public ItemDto.ItemResponse findById(Long itemId){
         Item item=itemRepository.findById(itemId).orElseThrow(()->new EntityNotFoundException("상품을 찾을수 없습니다"));
-        return new Response(item.getId(),item.getName(),item.getPrice());
+        return new ItemDto.ItemResponse(item.getId(),item.getName(),item.getPrice());
     }
 
     //상품 전체 조회 or검색 조회
-    public Page<Response> findAllItems(ItemSearchCondition condition, Pageable pageable) {
+    public Page<ItemDto.ItemListResponse> findAllItems(ItemSearchCondition condition, Pageable pageable) {
         List<Long> categoryIds  = Collections.emptyList();
 
         // 검색 조건에 categoryId가 들어온 경우,하위 카테고리 id들 까지 전부 추출
@@ -76,7 +76,7 @@ public class ItemService {
             categoryIds= categoryService.getSelfAndSubCategoryIds(condition.getCategoryId());
         }
 
-         Page<Response> items =itemQueryRepository.searchItems(condition,categoryIds,pageable);
+         Page<ItemDto.ItemListResponse> items =itemQueryRepository.searchItems(condition,categoryIds,pageable);
          return items;
     }
 

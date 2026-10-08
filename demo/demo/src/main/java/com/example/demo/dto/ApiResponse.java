@@ -35,6 +35,10 @@ public class ApiResponse<T> {
         return new ApiResponse<>(false,message,null);
     }
 
+    // 에러 데이터(예: Validation 결과 등)를 함께 전달(아직 적용 안했지만 추후에 적용)
+    public static <T> ApiResponse<T> fail(String message, T errorData) {
+        return new ApiResponse<>(false, message, errorData);
+    }
     //JSON
     //{
     //  "success": true,                       // ──┐

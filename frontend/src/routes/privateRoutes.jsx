@@ -5,7 +5,7 @@ const Mypage= lazy(()=>import('../pages/member/Mypage'));
 
 export const privateRoutes=[
     {
-        path: 'mypage',
+        path: 'my-page',
         element: <Mypage />,
     },
 ];
