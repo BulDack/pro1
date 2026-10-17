@@ -22,7 +22,7 @@ public class RefreshToken {
     @Column(nullable = false,unique = true)
     private String token;
 
-    @Column(nullable = false)
+    @Column(nullable = false,unique = true)
     private long memberId;  //연관관계 매핑대신 성능과 결합도를 낮추기 위해 id(pk)값만 저장
 
     @Column(nullable = false)
@@ -32,10 +32,11 @@ public class RefreshToken {
     public LocalDateTime expiryDate;
 
     @Builder
-    public RefreshToken(String token,Long memberId,boolean isUsed){
+    public RefreshToken(String token,Long memberId,boolean isUsed,LocalDateTime expiryDate){
         this.token=token;
         this.memberId=memberId;
         this.isUsed=isUsed;
+        this.expiryDate=expiryDate;
     }
 
     // 토큰 사용 완료 처리 (더티 체킹용)
@@ -47,5 +48,8 @@ public class RefreshToken {
     public void updateToken(String newToken,LocalDateTime newExpiryDate){
         this.token=newToken;
         this.expiryDate=newExpiryDate;
+
+        // 새로 발급한 토큰이므로 사용 완료 상태를 초기화.
+        this.isUsed = false;
     }
 }

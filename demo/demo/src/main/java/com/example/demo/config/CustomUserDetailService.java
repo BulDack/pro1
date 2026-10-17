@@ -3,7 +3,7 @@ package com.example.demo.config;
 import com.example.demo.config.oauth.dto.PrincipalDetails;
 import com.example.demo.config.oauth.dto.TokenMemberDto;
 import com.example.demo.entity.ennum.Role;
-import com.example.demo.repository.MemberJpaRepository;
+import com.example.demo.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 //CustomUserDetailService에 @Service 어노테이션이 붙어 있다면, 이를 기본 인증 처리기(DaoAuthenticationProvider)에 자동으로 주입하여 사용.
 public class CustomUserDetailService implements UserDetailsService {
 
-    private final MemberJpaRepository memberRepository;
+    private final MemberRepository memberRepository;
     @Override
     public UserDetails loadUserByUsername(String loginId) throws UsernameNotFoundException {
 

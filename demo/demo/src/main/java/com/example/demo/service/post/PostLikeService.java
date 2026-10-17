@@ -4,7 +4,7 @@ package com.example.demo.service.post;
 import com.example.demo.entity.Member;
 import com.example.demo.entity.Post.Post;
 import com.example.demo.entity.Post.PostLike;
-import com.example.demo.repository.MemberJpaRepository;
+import com.example.demo.repository.MemberRepository;
 import com.example.demo.repository.post.PostLikeRepository;
 import com.example.demo.repository.post.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,16 +18,16 @@ public class PostLikeService {
 
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
-    private final MemberJpaRepository memberRepository;
+    private final MemberRepository memberRepository;
 
-    public void like(Long postId,Long memberId){
-
-        Post post=postRepository.getReferenceById(postId);
-        Member member=memberRepository.getReferenceById(memberId);
+    public void addLike(Long postId,Long memberId){
 
         if(postLikeRepository.existsByMemberIdAndPostId(memberId,postId)){
             throw new IllegalStateException("이미 좋아요를 눌렀습니다.");
         }
+
+        Post post=postRepository.getReferenceById(postId);
+        Member member=memberRepository.getReferenceById(memberId);
 
         PostLike postLike= PostLike.builder()
                 .member(member)
@@ -40,11 +40,12 @@ public class PostLikeService {
     public void unlike(Long postId,Long memberId){
 
         PostLike postLike=postLikeRepository
-                .findByMemberIdAndPostId(memberId,postId)
+                .findByMember_IdAndPost_Id(memberId,postId)
                         .orElseThrow(()->new IllegalArgumentException("좋아요를 누르지 않았습니다."));
+
 
 
 
         postLikeRepository.delete(postLike);
     }
-}
+}//postLikeRepository.deleteLike(postId,memberId);

@@ -1,36 +1,72 @@
-import axios from "axios";
+import api from "../services/api.js";
 
 const API = "/api/posts";
 
-export const getPosts = async (page = 0, sort = "createdDate,desc") => {
-    const response = await axios.get(API, {
+/**
+ * 게시글 목록 조회
+ *
+ * page: 0부터 시작하는 페이지 번호
+ * sort: 서버의 PostSort enum 값
+ *       LATEST / OLDEST / TITLE / POPULAR
+ * title: 제목 검색어. 빈 문자열이면 검색 조건 없이 전체 목록 조회
+ *
+ * 기존 getPosts(page, sort) 호출도 사용할 수 있도록
+ * 세 번째 인자인 title의 기본값을 빈 문자열로 지정한다.
+ */
+export const getPosts = async (page = 0, sort = "LATEST",title="") => {
+    const response = await api.get(API, {
         params: {
             page,
             size: 10,
-            sort
+            sort,
+            // 검색어가 없으면 title 파라미터를 전송하지 않는다.
+            // 검색어가 있으면 서버의 searchRequestDto.title로 전달된다.
+            ...(title.trim() ? { title: title.trim() } : {})
         }
     });
 
+    //api.js가 Axios response.data를 반환한다고 가정.
+    //      *
+    //      * response = {
+    //      *   success: true,
+    //      *   data: {
+    //      *     content: [...],
+    //      *     totalPages: 5,
+    //      *     totalElements: 50,
+    //      *     number: 0
+    //      *   }
+    //      * }
+    //response.data는 Spring의 Page 객체다.
     return response.data;
 };
 
-export const getPost = async (id) => {
-    const response = await axios.get(`${API}/${id}`);
+export const getPost = async (postId,config={}) => {
+    const response = await api.get(`/api/posts/${postId}`,config);
 
     return response.data;
 };
 
 export const createPost = async (data) => {
-    const response = await axios.post(API, data);
+    const response = await api.post(API, data);
 
     return response.data;
 };
 
 export const updatePost = async (id, data) => {
-    await axios.put(`${API}/${id}`, data);
+    await api.put(`${API}/${id}`, data);
 };
 
 export const deletePost = async (id) => {
-    await axios.delete(`${API}/${id}`);
+    await api.delete(`${API}/${id}`);
 };
+
+export const likePost= async(postId)=>{
+    await api.post(`/api/posts/${postId}/likes`);
+
+}
+export const unlikePost= async(postId)=>{
+
+    await api.delete(`/api/posts/${postId}/unlikes`);
+
+}
 

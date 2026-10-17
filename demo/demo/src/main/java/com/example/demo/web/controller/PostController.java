@@ -1,6 +1,8 @@
 package com.example.demo.web.controller;
 
 import com.example.demo.config.oauth.dto.PrincipalDetails;
+import com.example.demo.dto.ApiResponse;
+import com.example.demo.dto.PostDto;
 import com.example.demo.ennum.PostSort;
 import com.example.demo.service.post.PostLikeService;
 import com.example.demo.service.post.PostService;
@@ -39,27 +41,34 @@ public class PostController {
     private final PostService postService;
     private final PostLikeService postLikeService;
 
-    //게시글 리스트 불러오기
+    //게시글 리스트 불러오기,검색으로 불러오기
     @GetMapping
-    public Page<postListResponse>findPosts(
+    public ApiResponse<Page<postListResponse>> searchPosts(
+            @ModelAttribute searchRequestDto requestDto,
             @PageableDefault(size = 20) Pageable pageable,
             @RequestParam(defaultValue = "latest") PostSort sort
     ){
-        return postService.findAll(pageable,sort);
+        Page<postListResponse>result=
+                postService.searchPosts(requestDto,pageable,sort);
 
+        return ApiResponse.success("게시물을 불러왔습니다",result);
     }
 
-    //게시글 검색한후 리스트 불러오기
-    //(GET /posts?sort=LATEST&page=0&size=10 최신순)이런식으로 조건을 달리해 불러올수있음
-    @GetMapping("/search")
-    public Page<postListResponse>searchFindAll(
-            searchRequestDto condition,
-            @PageableDefault(size = 20) Pageable pageable,
-            @RequestParam(defaultValue = "latest") PostSort sort
-    )
-    {
-        return postService.searchPosts(condition,pageable,sort);
+    //게시글 상세조회(수정버튼 활성화할 방법만 찾기)
+    @GetMapping("/{postId}")
+    public ApiResponse<postDetailResponse> getPostDetail(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal PrincipalDetails userDetails
 
+    ){
+        // 로그인한 상태라면, 이 글의 주인인지 확인하여 '수정' 버튼 노출 여부 결정
+        Long currentMemberId = userDetails != null
+                ? userDetails.getId()
+                : null;
+
+        postDetailResponse response=postService.getPostDetail(postId,currentMemberId);
+
+        return ApiResponse.success("게시글을 조회합니다",response);
     }
 
     //게시글 작성
@@ -73,54 +82,37 @@ public class PostController {
     }
 
     //게시물 수정
-    @PutMapping("/{id}")
+    @PatchMapping("/{postId}")
     public ResponseEntity<Void>updatePost(
-            @PathVariable Long id,
+            @PathVariable Long postId,
             @Valid @RequestBody updateRequestDto request,
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ){
 
-        postService.updatePost(id,request, principalDetails.getId());
+        postService.updatePost(postId,request, principalDetails.getId());
         return ResponseEntity.ok().build();
     }
 
     //게시글 삭제
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{postId}")
     public ResponseEntity<Void>deletePost(
-            @PathVariable Long id,
+            @PathVariable Long postId,
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ){
-        postService.deletePost(id, principalDetails.getId());
+        postService.deletePost(postId, principalDetails.getId());
         return ResponseEntity.ok().build();
     }
 
-    //게시글 상세조회(수정버튼 활성화할 방법만 찾기)
-    @GetMapping("/{id}")
-    public postDetailResponse getPost(@PathVariable Long id, @AuthenticationPrincipal PrincipalDetails userDetails
-                                              //Model model
-    ){
-        //postDetailResponse post = postService.findPost(id);
-        //model.addAttribute("article", post);
 
-        // 로그인한 상태라면, 이 글의 주인인지 확인하여 '수정' 버튼 노출 여부 결정
-        if(userDetails!=null){
-            boolean isOwner = id.equals(userDetails.getId());
-            //model.addAttribute("isOwner", isOwner); //이부분을 새로 대체할 로직 작성(그게 프론트엔드에서 처리하려나)
-        }
-
-        return postService.findPost(id);
-    }
-    //로그인한 사용자 글 리스트 가져오기(얘도 고쳐야됨 다 옛날 방식,리액트방식으로 다시 고치기)
+    //로그인한 사용자 글 리스트 가져오기()
     @GetMapping("/my")
-    public Page<postListResponse> mypost(@AuthenticationPrincipal PrincipalDetails userDetails,
-                                         @PageableDefault(size = 20) Pageable pageable
-                                         //Model model
+    public ApiResponse<Page<postListResponse>> getMypost(@AuthenticationPrincipal PrincipalDetails userDetails,
+                                         @PageableDefault(size = 10) Pageable pageable
     ){
 
-        Page<postListResponse> myPosts = postService.getMyPost(userDetails.getId(),pageable);
-        //model.addAttribute("myposts", myPosts);
-        //return "articles/myList";
-        return myPosts;
+        Page<postListResponse> result = postService.getMyPost(userDetails.getId(),pageable);
+
+        return ApiResponse.success("내 페이지를 불러 옵니다.",result);
 
 
         // 만약 성능이 걱정된다면? (Fetch Join)
@@ -131,25 +123,25 @@ public class PostController {
         //List<Article> findAllByMemberId(@Param("id") Long id);
     }
 
-    //좋아요 누르기 api
-    @PostMapping("/{id}/likes")
-    public void likePost(
-            @PathVariable Long id,
-            @AuthenticationPrincipal PrincipalDetails userDetails
-    )
-    {
-        postLikeService.like(id,userDetails.getId());
-    }
-
-    //좋아요 취소(좋아요를 한번 더눌러서)
-    @DeleteMapping("/{id}/likes")
-    public void unlikePost(
-            @PathVariable Long id,
-            @AuthenticationPrincipal PrincipalDetails userDetails
-    )
-    {
-        postLikeService.unlike(id,userDetails.getId());
-    }
+//    //좋아요 누르기 api
+//    @PostMapping("/{id}/likes")
+//    public void likePost(
+//            @PathVariable Long id,
+//            @AuthenticationPrincipal PrincipalDetails userDetails
+//    )
+//    {
+//        postLikeService.addLike(id,userDetails.getId());
+//    }
+//
+//    //좋아요 취소(좋아요를 한번 더눌러서)
+//    @DeleteMapping("/{id}/likes")
+//    public void unlikePost(
+//            @PathVariable Long id,
+//            @AuthenticationPrincipal PrincipalDetails userDetails
+//    )
+//    {
+//        postLikeService.unlike(id,userDetails.getId());
+//    }
 
 
 }

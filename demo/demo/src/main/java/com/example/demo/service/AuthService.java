@@ -6,7 +6,7 @@ import com.example.demo.config.JwtTokenProvider;
 import com.example.demo.dto.TokenResponseDto;
 import com.example.demo.entity.Member;
 import com.example.demo.entity.RefreshToken;
-import com.example.demo.repository.MemberJpaRepository;
+import com.example.demo.repository.MemberRepository;
 import com.example.demo.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +20,7 @@ public class AuthService {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
-    private final MemberJpaRepository memberRepository;
+    private final MemberRepository memberRepository;
 
     //silent Refresh(access토큰이 만료되면 자동으로 refresh해서 재발급)
     @Transactional
@@ -30,8 +30,8 @@ public class AuthService {
             throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
-        //2.refresh token에서 사용자 식별자(memberId) 추출
-        Long memberId =Long.parseLong(jwtTokenProvider.getId(refreshToken));
+        //2.refresh token에서 사용자 식별자(Id)pk 추출
+        Long memberId =jwtTokenProvider.getId(refreshToken);
 
         //3.db에서 해당 사용자의 refreshToken엔티티 조회
         RefreshToken savedToken =refreshTokenRepository.findByMemberId(memberId)
@@ -56,7 +56,7 @@ public class AuthService {
 
         //6.새로운 accessToken및 RefreshToken 생성(RTR 패턴 적용)
         String newAccessToken=jwtTokenProvider.createAccessToken(member);
-        String newRefreshToken =jwtTokenProvider.createRefreshToken(String.valueOf(memberId));
+        String newRefreshToken =jwtTokenProvider.createRefreshToken(member);
 
         //jpa 더티체킹(변경감지)를 통해 db의 토큰과 만료일 갱신
         LocalDateTime newExpiryDate=LocalDateTime.now().plusDays(7); //7일후 만료

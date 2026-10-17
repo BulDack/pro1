@@ -7,7 +7,7 @@ import com.example.demo.entity.Address;
 import com.example.demo.entity.Member;
 import com.example.demo.entity.RefreshToken;
 import com.example.demo.entity.ennum.Role;
-import com.example.demo.repository.MemberJpaRepository;
+import com.example.demo.repository.MemberRepository;
 import com.example.demo.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -26,7 +27,7 @@ import java.util.Optional;
 public class MemberService {
 
 
-    private final MemberJpaRepository memberJpaRepository;
+    private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -38,7 +39,7 @@ public class MemberService {
         validateDuplicateMember(member);
         String encodedPassword=passwordEncoder.encode(member.getPassword());
         member.updatePassword(encodedPassword);
-        memberJpaRepository.save(member);
+        memberRepository.save(member);
         return member.getId();
     }
     //실무에서는 검증 로직이 있어도 멀티 쓰레드 상황을 고려해서
@@ -46,7 +47,7 @@ public class MemberService {
 
     //회원중복검증
     private void validateDuplicateMember(Member member){
-        Optional<Member> findMembers= memberJpaRepository.findByLoginId(member.getLoginId());
+        Optional<Member> findMembers= memberRepository.findByLoginId(member.getLoginId());
         if(findMembers.isPresent()){
             throw new IllegalStateException("이미 존재하는 회원입니다");
         }
@@ -56,25 +57,59 @@ public class MemberService {
     @Transactional
     public LoginDto.ResponseDto login(LoginDto.RequestDto requestDto) {
 
-        Member member=memberJpaRepository.findByLoginId(requestDto.getLoginId())
+        Member member= memberRepository.findByLoginId(requestDto.getLoginId())
                 .orElseThrow(()->new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다"));
 
         if(!passwordEncoder.matches(requestDto.getPassword(),member.getPassword())){
             throw new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다");
         }
 
+//        // 재발급과 로그아웃도 토큰을 조회·변경하기 전에 같은 잠금을 사용해야 합니다.(이부분 아직 잘)
+//        memberRepository.findByIdForUpdate(member.getId())
+//                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+
         //인증이 완료되었으므로 jwt토큰 발급
+        //엑세스토큰 생성
         String accessToken= jwtTokenProvider.createAccessToken(member);
-        //필요하다면 refresh토큰도 여기서 함께 생성
+        //리프레시 토큰도 생성
         String refreshToken= jwtTokenProvider.createRefreshToken(member);
 
-        RefreshToken tokenEntity= RefreshToken.builder()
-                .token(refreshToken)
-                .memberId(member.getId())
-                .isUsed(false)
-                .build();
+        // 발급한 Refresh Token의 실제 만료 시각을 읽음.
+        // JWT와 DB의 만료일을 동일하게 유지하기 위해
+        // '현재 시각 + 7일'을 별도로 계산하지 않음.
+        LocalDateTime expiryDate = LocalDateTime.ofInstant(
+                jwtTokenProvider.getClaims(refreshToken)
+                        .getExpiration()
+                        .toInstant(),
+                java.time.ZoneId.systemDefault()
+        );
 
-        refreshTokenRepository.save(tokenEntity);
+
+        // 새 로그인에서 발급한 토큰으로 교체합니다.
+        // 이전 기기가 가진 Refresh Token으로는 더 이상 재발급할 수 없습니다.
+
+        RefreshToken savedToken = refreshTokenRepository
+                .findByMemberId(member.getId())
+                .orElse(null);
+
+        if(savedToken != null){
+            // 새 로그인에서 발급한 토큰으로 교체합니다.
+            // 이전 기기가 가진 Refresh Token으로는 더 이상 재발급할 수 없습니다.
+            savedToken.updateToken(refreshToken, expiryDate);
+
+            // login()에 @Transactional이 있으므로,
+            // 조회한 엔티티의 변경 내용은 트랜잭션 종료 시 DB에 반영됩니다.
+        } else {
+            // 최초 로그인이나 로그아웃 후 로그인은 새 행을 생성합니다.
+            RefreshToken newToken = RefreshToken.builder()
+                    .token(refreshToken)
+                    .memberId(member.getId())
+                    .isUsed(false)
+                    .expiryDate(expiryDate)
+                    .build();
+
+            refreshTokenRepository.save(newToken);
+        }
 
         //리액트 프론트엔드가 필요한 정보들을 dto에 담아서 반환
         return LoginDto.ResponseDto.builder()
@@ -83,24 +118,6 @@ public class MemberService {
                 .username(member.getLoginId()) //화면에 ooo님 환영합니다와 같은 용도로 사용가능
                 .build();
     }
-//    @PostMapping("/api/auth/login")
-//    public ResponseEntity<?> login(@RequestBody LoginRequest dto) {
-//        // 1. CustomUserDetailsService(또는 AuthenticationManager)를 이용해 유저 검증
-//        PrincipalDetails principalDetails = (PrincipalDetails) customUserDetailsService
-//                .loadUserByUsername(dto.getLoginId());
-//
-//        // (비밀번호 검증 로직 등 진행...)
-//
-//        // 2. 로그인 성공했으니 JWT 토큰 생성 (JwtProvider 사용)
-//        String accessToken = jwtProvider.createAccessToken(
-//                principalDetails.getId(),
-//                principalDetails.getUsername(),
-//                principalDetails.getRole()
-//        );
-//
-//        // 3. ⭐️ 직접 컨트롤러의 return문으로 토큰을 응답 바디에 넣어줌!
-//        return ResponseEntity.ok(new LoginResponse(accessToken));
-//    }
 
 //---JPA에서 deleteBy... 메서드를 호출하면 내부적으로 select 쿼리를 실행해 엔티티를 영속성 컨텍스트로 가져온 뒤 하나씩 delete 쿼리를 날립니다.
 // 즉, 어차피 내부적으로 조회가 일어나기 때문에 차라리 개발자가 눈으로 보게끔 명시적으로 findByToken을 하는 것이 영속성 컨텍스트의 이점을 온전히 누리면서 비즈니스 로직을 통제하기에 훨씬 유리합니다.
@@ -132,16 +149,16 @@ public class MemberService {
 
 
     public List<Member> findMembers() {
-        return memberJpaRepository.findAll();
+        return memberRepository.findAll();
     }
 
     public Member findMember(Long memberId){
-        return memberJpaRepository.findById(memberId).orElseThrow(()->new NoSuchElementException("해당회원을 찾을 수 없읍니다"));
+        return memberRepository.findById(memberId).orElseThrow(()->new NoSuchElementException("해당회원을 찾을 수 없읍니다"));
     }
 
     @Transactional
     public void update(Long id, String userName) {
-        Member member=memberJpaRepository.findById(id)
+        Member member= memberRepository.findById(id)
                 .orElseThrow(()->new NoSuchElementException("해당회원을 찾을 수 없읍니다"));
         member.changeName(userName);
 

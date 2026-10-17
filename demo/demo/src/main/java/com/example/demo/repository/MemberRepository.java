@@ -1,17 +1,18 @@
 package com.example.demo.repository;
 
 import com.example.demo.entity.Member;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
 //테이블의 기본키(@Id)가 아닌 일반 컬럼이나 복합적인 조건으로 데이터를 다룰 때는 공통 메서드로 만들 수 없기 때문에, 규칙에 맞게 개발자가 직접 메서드를 정의해야함
-public interface MemberJpaRepository extends JpaRepository<Member,Long> {
+public interface MemberRepository extends JpaRepository<Member,Long> {
 
 //    @PersistenceContext
 //    private EntityManager em;
@@ -30,6 +31,13 @@ public interface MemberJpaRepository extends JpaRepository<Member,Long> {
 
 
     Optional<Member> findByEmail(String email);
+
+
+    // 같은 회원의 로그인·재발급·로그아웃이 동시에 진행되지 않도록
+// 해당 회원 행을 트랜잭션이 끝날 때까지 잠급니다.
+//    @Lock(LockModeType.PESSIMISTIC_WRITE)
+//    @Query("select m from Member m where m.id = :memberId")
+//    Optional<Member> findByIdForUpdate(@Param("memberId") Long memberId);
 
 //    public List<Member> findByName(String name){
 //        return em.createQuery("select m from member m where m.name=:name",Member.class)

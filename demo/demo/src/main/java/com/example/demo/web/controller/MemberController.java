@@ -37,12 +37,12 @@ public class MemberController {
         LoginDto.ResponseDto responseDto=memberService.login(requestDto);
 
         // 2. 서버측에서 refreshToken을 담은 httpOnly 쿠키 생성
-        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", responseDto.getRefreshToken())
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", responseDto.getRefreshToken())
                 .httpOnly(true)                  // JS 접근 차단 (XSS 방어)
                 .secure(true)                    // HTTPS 환경 전송 (로컬 개발 환경 상황에 맞게 설정)
                 .path("/")                       // 모든 URL 요청 시 쿠키 전송
                 .maxAge(7 * 24 * 60 * 60)        // 유효기간 7일
-                .sameSite("None")                // React - Spring Boot CROS 환경 시 "None" (동일 오리진 시 "Lax")
+                .sameSite("Lax")                // React - Spring Boot CROS 환경 시 "None" (동일 오리진 시 "Lax")
                 .build();
 
 
@@ -64,7 +64,7 @@ public class MemberController {
     //쿠키를 지우는 방법은 의외로 간단한데, 유효기간(MaxAge)을 0으로 세팅한 똑같은 이름의 빈 쿠키를 응답으로 덮어씌워 보내주면 브라우저가 알아서 쿠키를 증발시킴.
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal PrincipalDetails principalDetails,
-                                       @CookieValue(value = "refreshToken", required = false) String refreshToken
+                                       @CookieValue(value = "refresh_token", required = false) String refreshToken
                                          ){
         // 1.서비스단에서 우리db의 refreshToken 삭제
         //로그인한 상태(Authentication 존재)이거나 쿠키에 RefreshToken이 존재하는 경우
@@ -73,12 +73,12 @@ public class MemberController {
         }
 
         // 2. ⭐️ 브라우저의 쿠키를 지우기 위해 만료시간이 0인 쿠키를 밀어 넣음
-        ResponseCookie deleteCookie = ResponseCookie.from("refreshToken","")
+        ResponseCookie deleteCookie = ResponseCookie.from("refresh_token","")
                 .httpOnly(true)
                 .secure(false) // ⚠️ 운영 환경(HTTPS)인 경우 true, 로컬 HTTP 개발 시 false로 세팅 (설정파일 분리 권장)
                 .path("/")
                 .maxAge(0) // 즉시 만료 (삭제)
-                .sameSite("None") // ⚠️ React - Spring Boot 크로스 오리진 환경인 경우 "None", 동일 오리진이면 "Lax"
+                .sameSite("Lax") // ⚠️ React - Spring Boot 크로스 오리진 환경인 경우 "None", 동일 오리진이면 "Lax"
                 .build();
 
         return ResponseEntity.ok()

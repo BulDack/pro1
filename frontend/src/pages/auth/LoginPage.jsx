@@ -88,6 +88,11 @@ export default function LoginPage() {
                 회원가입
            </Link>
       </div>
+      <div>
+        <Link to="/">
+          홈으로
+        </Link>
+      </div>
     </div>
   );
 }

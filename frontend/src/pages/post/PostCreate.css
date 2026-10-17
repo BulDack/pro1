@@ -1,0 +1,193 @@
+/* 게시판 목록과 같은 너비·여백·색상을 사용한다.
+   작성 화면 내부에만 적용하도록 클래스 범위를 지정한다. */
+.post-create {
+    width: min(1080px, 100%);
+    margin: 0 auto;
+    padding: 48px 24px 64px;
+    color: #1e293b;
+}
+
+.post-create .post-create__header {
+    margin-bottom: 28px;
+}
+
+.post-create .post-create__header h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -1px;
+}
+
+.post-create .post-create__header p {
+    margin: 10px 0 0;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* 입력 영역을 하나의 흰색 카드로 묶는다. */
+.post-create .post-create__form {
+    padding: 32px;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 4px 20px rgb(15 23 42 / 3%);
+}
+
+.post-create .post-create__field + .post-create__field {
+    margin-top: 28px;
+}
+
+.post-create .post-create__field label {
+    display: block;
+    margin-bottom: 10px;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.post-create .post-create__field input,
+.post-create .post-create__field textarea {
+    display: block;
+    width: 100%;
+    border: 1px solid #dbe2ea;
+    border-radius: 8px;
+    background: #fff;
+    color: #1e293b;
+    font: inherit;
+    font-size: 15px;
+    transition:
+            border-color 0.15s,
+            box-shadow 0.15s;
+}
+
+.post-create .post-create__field input {
+    height: 48px;
+    padding: 0 16px;
+}
+
+.post-create .post-create__field textarea {
+    min-height: 340px;
+    padding: 16px;
+    line-height: 1.8;
+    resize: vertical;
+}
+
+.post-create .post-create__field input::placeholder,
+.post-create .post-create__field textarea::placeholder {
+    color: #94a3b8;
+}
+
+/* 입력 중인 영역을 파란색으로 강조한다. */
+.post-create .post-create__field input:focus,
+.post-create .post-create__field textarea:focus {
+    border-color: #2563eb;
+    outline: none;
+    box-shadow: 0 0 0 3px rgb(37 99 235 / 10%);
+}
+
+.post-create .post-create__field input:disabled,
+.post-create .post-create__field textarea:disabled {
+    background: #f8fafc;
+    color: #64748b;
+}
+
+.post-create .post-create__count {
+    margin: 8px 0 0;
+    color: #94a3b8;
+    font-size: 12px;
+    text-align: right;
+}
+
+.post-create .post-create__error {
+    margin: 20px 0 0;
+    color: #b91c1c;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* 입력 영역과 버튼 영역을 가는 구분선으로 나눈다. */
+.post-create .post-create__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.post-create .post-create__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 20px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+            background-color 0.15s,
+            border-color 0.15s;
+}
+
+.post-create .post-create__button--outline {
+    border-color: #dbe2ea;
+    background: #fff;
+    color: #475569;
+}
+
+.post-create .post-create__button--outline:hover:not(:disabled) {
+    border-color: #94a3b8;
+    background: #f8fafc;
+}
+
+.post-create .post-create__button--primary {
+    background: #2563eb;
+    color: #fff;
+}
+
+.post-create .post-create__button--primary:hover:not(:disabled) {
+    background: #1d4ed8;
+}
+
+.post-create .post-create__button:focus-visible {
+    outline: 3px solid #93c5fd;
+    outline-offset: 3px;
+}
+
+.post-create .post-create__button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* 모바일에서는 여백과 입력창 높이를 줄인다. */
+@media (max-width: 640px) {
+    .post-create {
+        padding: 28px 16px 40px;
+    }
+
+    .post-create .post-create__header h1 {
+        font-size: 26px;
+    }
+
+    .post-create .post-create__header p {
+        font-size: 13px;
+    }
+
+    .post-create .post-create__form {
+        padding: 20px;
+    }
+
+    .post-create .post-create__field textarea {
+        min-height: 260px;
+    }
+
+    .post-create .post-create__button {
+        padding: 0 16px;
+    }
+}

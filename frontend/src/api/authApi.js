@@ -1,4 +1,5 @@
-import api from '../services/api';
+import {authApi} from "../services/api";
+
 
 /**
  * 백엔드 서버로 로그인 요청을 보내는 API 통신 함수
@@ -11,7 +12,7 @@ import api from '../services/api';
  */
 export const loginApi = async (loginId, password) => {
   try {
-    const response = await api.post('/api/auth/login', { loginId, password });
+    const response = await authApi.post('/api/auth/login', { loginId, password });
       return response.data.data; //백엔드에서 넘겨준 json 데이터 반환
     // 백엔드 공통 응답 포맷 (ApiResponse<T>) 파싱
     // response.data = { success: true, message: "...", data: { accessToken: "...", username: "..." } }
@@ -25,7 +26,7 @@ export const loginApi = async (loginId, password) => {
 //회원가입 api
 export const registerApi=async (userData) =>{
   try{
-    const response =await api.post('api/auth/join',userData);
+    const response =await authApi.post('api/auth/join',userData);
     return response.data;
   }catch (error){
     const errorMessage=error.response?.data?.message ||'회원가입에 실패하였습니다.';
@@ -36,7 +37,7 @@ export const registerApi=async (userData) =>{
 //로그아웃 api
 export const logoutApi = async () => {
   try {
-    const response = await api.post('/api/auth/logout');
+    const response = await authApi.post('/api/auth/logout');
     return response.data;
   } catch (error) {
     console.error('Logout API Error:', error);

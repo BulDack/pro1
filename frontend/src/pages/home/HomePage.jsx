@@ -22,10 +22,11 @@
 //
 // export default HomePage;
 
-import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './HomePage.css';
 
 const HomePage = () => {
+    const navigate = useNavigate();
     return (
         <div className="home-page">
             <div className="home-container">
@@ -47,14 +48,14 @@ const HomePage = () => {
                             마음에 드는 상품을 만나보세요.
                         </p>
 
-                        <button className="hero-button">
+                        <button type="button" className="hero-button" onClick={() => navigate('/main')}>
                             상품 보러가기
                         </button>
                     </div>
 
                     <div className="hero-image-wrapper">
                         <img
-                            src="http://localhost:8080/uploads/items/muck.png"
+                            src="http://localhost:8080/uploads/items/cat.jpg"
                             alt="상품 이미지"
                             className="hero-image"
                         />

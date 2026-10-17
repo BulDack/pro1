@@ -27,15 +27,15 @@ public class Post extends BaseEntity {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-
+    @Column(nullable = false)
     private Long viewCount;//조회수
 
+    @Column(nullable = false)
     private Long likeCount;// 좋아요 수
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name= "member_id",nullable = false)
     private Member member;
-
 
     //CascadeType.REMOVE: "게시글을 지우면 댓글도 다 지움(부모 엔티티 자체가 삭제될 때)
     //orphanRemoval = true: "게시글을 지울 때도 지워주고, 게시글의 댓글 목록(List)에서 댓글 하나만 쏙 뺐을 때도 DB에서 그 댓글을 지움"

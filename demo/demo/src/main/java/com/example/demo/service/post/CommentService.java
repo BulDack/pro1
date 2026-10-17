@@ -5,7 +5,7 @@ import com.example.demo.entity.Post.Comment;
 import com.example.demo.entity.Member;
 import com.example.demo.entity.Post.Post;
 import com.example.demo.repository.post.CommentRepository;
-import com.example.demo.repository.MemberJpaRepository;
+import com.example.demo.repository.MemberRepository;
 import com.example.demo.repository.post.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,13 +20,13 @@ public class CommentService {
 
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
-    private final MemberJpaRepository memberJpaRepository;
+    private final MemberRepository memberRepository;
 
     //댓글생성
     @Transactional
     public Long createComment(Long postId,commentDto request,Long memberId){
 
-        Member member=memberJpaRepository.getReferenceById(memberId);
+        Member member= memberRepository.getReferenceById(memberId);
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
 

@@ -1,11 +1,14 @@
 package com.example.demo.service.post;
 
+import com.example.demo.dto.ApiResponse;
 import com.example.demo.ennum.PostSort;
 import com.example.demo.entity.Post.Post;
 import com.example.demo.entity.Member;
+import com.example.demo.repository.post.PostLikeRepository;
 import com.example.demo.repository.post.PostQueryRepository;
 import com.example.demo.repository.post.PostRepository;
-import com.example.demo.repository.MemberJpaRepository;
+import com.example.demo.repository.MemberRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,14 +27,15 @@ import static com.example.demo.dto.PostDto.postDetailResponse;
 public class PostService {
 
     private final PostRepository postRepository;
-    private final MemberJpaRepository memberJpaRepository;
+    private final PostLikeRepository postLikeRepository;
+    private final MemberRepository memberRepository;
     private final PostQueryRepository postQueryRepository;
 
 
     //게시글 작성
     @Transactional
     public Long createPost(createRequestDto request, Long memberId){
-        Member member=memberJpaRepository.getReferenceById(memberId);
+        Member member= memberRepository.getReferenceById(memberId);
         Post post= Post.builder().
                 content(request.content())
                 .title(request.title())
@@ -67,10 +71,35 @@ public class PostService {
 
     //해당 글만 찾기(게시글을 클릭하면 상세조회)
     //게시글 상세 조회 / 수정 / 삭제처럼 `Post 엔티티 자체가 필요한 경우에 쓰기 !!!
-    public postDetailResponse findPost(Long postId) {
-        Post post= this.postRepository.findById(postId).orElseThrow(()->new IllegalArgumentException("존재하지 않는 게시글입니다."));
+    @Transactional
+    public postDetailResponse getPostDetail(Long postId,Long currentMemberId) {
 
-        return postQueryRepository.findDetailPost(postId);
+        postDetailResponse post= postQueryRepository.findDetailPost(postId,currentMemberId);
+        if (post == null) {
+            throw new EntityNotFoundException("게시글이 존재하지 않습니다.");
+        }
+
+        //조회수 증가
+        int updated=postRepository.increaseViewCount(postId);
+        System.out.println("조회수 UPDATE 결과 = " + updated);
+
+        /*
+         * 2. 현재 로그인한 사용자와 게시글 작성자를 비교한다.
+         *
+         * 비로그인 사용자는 currentMemberId가 null이므로
+         * false가 된다.
+         *
+         * Long 객체는 == 대신 equals()로 값 비교를 한다.
+         */
+        boolean isAuthor =
+                currentMemberId != null
+                        && currentMemberId.equals(post.authorId());
+
+        //4.현재 사용자의 좋아요 여부 확인
+        //boolean liked=currentMemberId!=null &&postLikeRepository.existsByMemberIdAndPostId(currentMemberId,postId);
+
+        //5.좋아요 상태및 수정
+        return post.withPermissions(isAuthor,isAuthor);
     }
 
     //내 모든 게시글 보이기
@@ -88,10 +117,4 @@ public class PostService {
         return postQueryRepository.searchPosts(request,pageable,sort);
     }
 
-
-    //모든 게시글 불러오기
-    public Page<postListResponse>findAll(Pageable pageable, PostSort sort){
-
-        return postQueryRepository.findAllPost(pageable,sort);
-    }
 }

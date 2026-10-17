@@ -33,6 +33,7 @@ public class Member {
 
     private String email;
 
+    @Column(unique = true)
     private String loginId;
 
     private String password;
@@ -63,14 +64,14 @@ public class Member {
         return member;
     }
 
-//    @Builder //빌더를 메서드 단위에 놓으면 원하는 필드로만 구성할수 있음
-//    public Member(String email, String username, Provider provider, String providerId, Role role) {
-//        this.email = email;
-//        this.username = username;
-//        this.provider = provider;
-//        this.providerId = providerId;
-//        this.role = role;
-//    }
+    @Builder //빌더를 메서드 단위에 놓으면 원하는 필드로만 구성할수 있음
+    public Member(String email, String username, Provider provider, String providerId, Role role) {
+        this.email = email;
+        this.username = username;
+        this.provider = provider;
+        this.providerId = providerId;
+        this.role = role;
+    }
 
     public Member update(String name){
         this.username=name;

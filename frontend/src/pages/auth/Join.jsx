@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {useNavigate,Link} from 'react-router-dom';
+import {validateEmail,validatePassword} from "@/utils/validation.js";
 import api from '@/services/api.js';
 
 const Join = () => {
@@ -28,15 +29,28 @@ const Join = () => {
 
   const handleJoinSubmit = async (e) => {
     e.preventDefault();
-
     setErrorMessage('');
 
     console.log('회원가입 버튼이 클릭되었습니다!', formData);
+
+    if(!formdata.username.trim() || !formData.email.trim()){
+      setErrorMessage('이름과 아이디를 입력해주세요');
+      return;
+    }
+
     //비밀번호 확인
-    if((formData.password!=formData.passwordConfirm)){
+    if((formData.password!==formData.passwordConfirm)){
         setErrorMessage('비밀번호가 일치하지 않습니다.');
         return;
     }
+
+    if(!validatePassword(formData.password)){
+      setErrorMessage('비밀번호는 8자 이상이어야 합니다.');
+    }
+    if(!validateEmail(formData.email)){
+      setErrorMessage('올바른 이메일 주소를 입력해주세요')
+    }
+
 
     //  💡 passwordConfirm을 제외한 나머지 필드만 requestData로 추출
     const { passwordConfirm, ...requestData } = formData;
@@ -82,7 +96,7 @@ const Join = () => {
 
   return (
       <>
-    <form onSubmit={handleJoinSubmit}>
+    <form onSubmit={handleJoinSubmit} noValidate>
       <h2>회원가입</h2>
 
       {/* 💡 에러 메시지가 있을 경우 화면에 빨간색으로 표시 */}

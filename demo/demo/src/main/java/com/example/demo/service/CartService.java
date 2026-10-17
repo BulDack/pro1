@@ -7,7 +7,7 @@ import com.example.demo.entity.item.Item;
 import com.example.demo.repository.order.CartItemRepository;
 import com.example.demo.repository.order.CartRepository;
 import com.example.demo.repository.ItemRepository;
-import com.example.demo.repository.MemberJpaRepository;
+import com.example.demo.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ public class CartService {
 
     private final ItemRepository itemRepository;
     private final CartRepository cartRepository;
-    private final MemberJpaRepository memberRepository;
+    private final MemberRepository memberRepository;
     private final CartItemRepository cartItemRepository;
 
 

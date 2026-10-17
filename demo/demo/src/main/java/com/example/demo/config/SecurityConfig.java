@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -84,7 +85,8 @@ public class SecurityConfig {
                 // URL별 접근 권한 설정 (🔥 주소 앞에 '/' 추가 필수!)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/admin/**").hasRole("ADMIN") //이주소는 관리자만
-                        .requestMatchers("/api/auth/login", "/api/auth/join","/uploads/**","api/auth/refresh").permitAll()// 'api/...' -> '/api/...'로 수정
+                        .requestMatchers("/api/auth/login","/api/auth/logout", "/api/auth/join","/uploads/**","api/auth/refresh","api/main").permitAll()// 'api/...' -> '/api/...'로 수정
+                        .requestMatchers(HttpMethod.GET,"/api/posts","/api/posts/**","/api/items","/api/items/**").permitAll()
                         .anyRequest().authenticated())
 
                 //소셜로그인 설정

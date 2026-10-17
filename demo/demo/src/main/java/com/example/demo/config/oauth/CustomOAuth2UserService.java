@@ -3,7 +3,7 @@ package com.example.demo.config.oauth;
 import com.example.demo.config.oauth.dto.OAuth2Attributes;
 import com.example.demo.config.oauth.dto.TokenMemberDto;
 import com.example.demo.entity.Member;
-import com.example.demo.repository.MemberJpaRepository;
+import com.example.demo.repository.MemberRepository;
 import com.example.demo.config.oauth.dto.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 //CustomOAuth2UserService는 스프링 시큐리티의 필터 체인 내부에서 인증을 처리할 때 자동으로 동작하는 서비스
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
-    private final MemberJpaRepository memberRepository;
+    private final MemberRepository memberRepository;
 
 
     //OAuth2UserRequest 는 clientRegistration(우리 서비스의 OAuth2 설정 정보)과

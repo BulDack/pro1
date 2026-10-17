@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import {refreshAccessToken} from '@/services/api';
 import {loginApi,logoutApi} from "@/api/authApi.js";
 
 const AuthContext = createContext(null); //전체 공유할 context생성
@@ -29,29 +29,90 @@ export const AuthProvider = ({children}) =>{
         }
     };
 
-    // Silent Refresh (페이지 새로고침 시 HttpOnly 쿠키 기반 Access Token 재발급)
-    const refreshAccessToken = useCallback(async () => {
-        try {
-            // HttpOnly 쿠키 기반으로 백엔드에 새 Access Token 요청
-            const response = await axios.post('http://localhost:8080/api/auth/refresh', {}, { withCredentials: true });
-            setAccessToken(response.data.accessToken);
-        } catch (error) {
-            setAccessToken(null);
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);//useCallback은 함수를 기억햇다가 재사용
+    /*
+    * ====================================================
+    * 1. 앱 최초 실행(+새로고침) 시 인증 상태 복원
+    * ====================================================
+    *
+    * 페이지 새로고침이 발생하면 React 메모리에 저장된
+    * Access Token은 사라진다.
+    *
+    * 따라서 HttpOnly 쿠키의 Refresh Token으로
+    * 새로운 Access Token을 발급받아 복원한다.
+    *
+    * 함수도 객체이기때문에 react컴포넌트가 다시 렌더링되면 객체도 새롭게 다시 생김
+    */
+    useEffect(() => {
 
-    // -------------------------------------------------------------
-    // 📌 [역할 3] 앱 실행 시 최우선 자동 실행
-    // -------------------------------------------------------------
-    useEffect(()=>{
-        refreshAccessToken();
-    },[refreshAccessToken]); //함수도 객체이기때문에 react컴포넌트가 다시 렌더링되면 객체도 새롭게 다시 생김
-                                //useEffect는 두번째 인수값이 바뀌면 다시실행
+        let active = true;
 
+        const initializeAuth = async () => {
+            try {
+
+                /*
+                 * api.js에 정의한 공통 재발급 함수 호출
+                 *
+                 * 성공하면 새 Access Token을 반환한다.
+                 */
+                const token = await refreshAccessToken();
+
+                /*
+                 * AuthProvider가 아직 유지되는 경우에만
+                 * 로그인 상태를 갱신한다.
+                 */
+                if (active) {
+                    setAccessToken(token);
+                }
+
+            } catch (error) {
+
+                /*
+                 * 비로그인 사용자는 Refresh Token이
+                 * 존재하지 않을 수도 있다.
+                 *
+                 * 따라서 Refresh가 실패하더라도
+                 * 경고창을 띄우지 않고 비로그인 상태로 둔다.
+                 */
+                if (active) {
+                    setAccessToken(null);
+                }
+
+            } finally {
+
+                /*
+                 * 인증 상태 복원이 끝나면 로딩 종료
+                 */
+                if (active) {
+                    setIsLoading(false);
+                }
+            }
+        };
+
+        initializeAuth();
+
+        /*
+         * 컴포넌트가 언마운트(컴포넌트가 화면에서 완전히 사라지는 순간=다른페이지로 이동해서 기존 컴포넌트가 화면에서 치워질때)된 뒤 응답이 도착하는 경우 상태 변경을 방지한다.
+         * 언마운트 됐을때 useEffect안에서 return해준 정리(cleanUp)함수가 실행됨
+         */
+        return () => {
+            active = false;
+        };
+
+    }, []); //빈배열을 주면 컴포넌트가 화면에 처음에 나타나고나서 딱한번 실행
+
+    //==================
+    //Context의 작동 방식 (방송국 모델)Context는 이 문제를 "방송국과 수신" 방식으로 해결합니다.
+
+    //Context 생성 (createContext): 데이터를 담아둘 전역 방송국(상자)을 만듭니다.
+    //데이터 공급 (Provider): 방송국의 송신기 역할을 하는 컴포넌트(AuthProvider 등)로 자식들을 감쌉니다. 이 Provider 안에 공유할 데이터(예: accessToken, updateToken 등)를 싣습니다.
+    //데이터 소비 (useContext): 중간에 있는 수많은 컴포넌트들을 무시하고, 데이터가 필요한 깊은 곳의 컴포넌트가 직접 방송국 주파수를 맞춰 데이터를 쏙 빼씁니다 (useAuth() 훅을 통해서 말입니다).
+
+    // Context를 사용할 때의 주의점 (언제 써야 할까?)
+    // Context는 매우 편리하지만 모든 곳에 남발하면 안 되는 이유가 있습니다.
+    //전역 상태 공유에 적합: 로그인 유저 정보, 앱 테마(다크모드/라이트모드), 언어 설정 등 애플리케이션 전반에 걸쳐 여러 컴포넌트가 공유해야 하는 데이터에 가장 알맞습니다.
+    //리렌더링 이슈: Context 안의 데이터(예: accessToken)가 바뀌면, 그 Context를 구독하고 있는 모든 하위 컴포넌트가 강제로 리렌더링됩니다. 따라서 자주 바뀌지 않거나 특정 컴포넌트에서만 쓰이는 국소적인 데이터라면 일반적인 props나 지역 상태(useState)로 두는 것이 성능상 훨씬 유리합니다.
     // -------------------------------------------------------------
-    // 📌 [역할 4] 자식 컴포넌트들에게 데이터와 함수 공유
+    // 📌 [역할 2] 자식 컴포넌트들에게 데이터와 함수 공유
     // -------------------------------------------------------------
     return (
         <AuthContext.Provider

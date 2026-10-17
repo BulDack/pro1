@@ -8,7 +8,7 @@ import com.example.demo.entity.item.CartItem;
 import com.example.demo.entity.item.Item;
 import com.example.demo.repository.order.CartItemRepository;
 import com.example.demo.repository.ItemRepository;
-import com.example.demo.repository.MemberJpaRepository;
+import com.example.demo.repository.MemberRepository;
 import com.example.demo.repository.order.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final MemberJpaRepository memberJpaRepository;
+    private final MemberRepository memberRepository;
     private final ItemRepository itemRepository;
     private final CartItemRepository cartItemRepository;
 
@@ -41,7 +41,7 @@ public class OrderService {
         long totalPrice=item.getPrice()*orderDto.getCount();
 
 
-        Member memberRef=memberJpaRepository.getReferenceById(memberId);
+        Member memberRef= memberRepository.getReferenceById(memberId);
         Address address=new Address(orderDto.getAddress().city(),orderDto.getAddress().street(),orderDto.getAddress().zipcode());
         Delivery delivery=Delivery.createDelivery(address, DeliveryStatus.READY);
 
@@ -90,7 +90,7 @@ public class OrderService {
         }
 
         //SELECT 쿼리를 생략하고 프록시 객체만 전달하기 (성능 최적화)
-        Member memberRef=memberJpaRepository.getReferenceById(memberId);
+        Member memberRef= memberRepository.getReferenceById(memberId);
         Address address= new Address(request.address().city(), request.address().street(),request.address().zipcode());
         Delivery delivery=Delivery.createDelivery(address,DeliveryStatus.READY);
 

@@ -1,0 +1,274 @@
+/* 목록·작성 화면과 동일한 너비와 바깥 여백을 사용한다. */
+.post-detail {
+    width: min(1080px, 100%);
+    margin: 0 auto;
+    padding: 48px 24px 64px;
+    color: #1e293b;
+}
+
+.post-detail .post-detail__page-header {
+    margin-bottom: 28px;
+}
+
+.post-detail .post-detail__page-header h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -1px;
+}
+
+.post-detail .post-detail__page-header p {
+    margin: 10px 0 0;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* 제목·본문·버튼을 하나의 카드로 묶는다. */
+.post-detail .post-detail__card,
+.post-detail .post-detail__feedback {
+    padding: 32px;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 4px 20px rgb(15 23 42 / 3%);
+}
+
+.post-detail .post-detail__article-header {
+    padding-bottom: 24px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.post-detail .post-detail__badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 6px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.post-detail .post-detail__article-header h2 {
+    margin: 16px 0;
+    color: #0f172a;
+    font-size: 27px;
+    font-weight: 700;
+    line-height: 1.5;
+    letter-spacing: -0.6px;
+    overflow-wrap: anywhere;
+}
+
+/* 작성 정보를 가로로 나열하고, 공간이 부족하면 줄을 바꾼다. */
+.post-detail .post-detail__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.post-detail .post-detail__meta > div {
+    display: flex;
+    gap: 8px;
+    min-width: 0;
+}
+
+.post-detail .post-detail__meta dt {
+    flex-shrink: 0;
+    color: #94a3b8;
+}
+
+.post-detail .post-detail__meta dd {
+    margin: 0;
+    color: #64748b;
+    overflow-wrap: anywhere;
+}
+
+/* 작성자가 입력한 줄바꿈은 유지하고,
+   긴 URL이나 공백 없는 문자열도 카드 밖으로 넘치지 않게 한다. */
+.post-detail .post-detail__content {
+    min-height: 260px;
+    padding: 32px 0;
+    color: #334155;
+    font-size: 16px;
+    line-height: 1.9;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+/* 좋아요 버튼은 본문 아래 중앙에 배치한다. */
+.post-detail .post-detail__reaction {
+    display: flex;
+    justify-content: center;
+    padding: 12px 0 32px;
+}
+
+.post-detail .post-detail__like {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 46px;
+    padding: 0 22px;
+    border: 1px solid #e2e8f0;
+    border-radius: 24px;
+    background: #fff;
+    color: #64748b;
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    transition:
+            background-color 0.15s,
+            border-color 0.15s,
+            color 0.15s;
+}
+
+.post-detail .post-detail__like > span:first-child {
+    font-size: 22px;
+    line-height: 1;
+}
+
+.post-detail .post-detail__like strong {
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+}
+
+.post-detail .post-detail__like:hover:not(:disabled),
+.post-detail .post-detail__like--active {
+    border-color: #fecdd3;
+    background: #fff1f2;
+    color: #e11d48;
+}
+
+.post-detail .post-detail__error {
+    margin: 0 0 20px;
+    color: #b91c1c;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* 목록 버튼은 왼쪽, 수정·삭제 버튼은 오른쪽에 배치한다. */
+.post-detail .post-detail__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-top: 24px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.post-detail .post-detail__actions {
+    display: flex;
+    gap: 8px;
+}
+
+.post-detail .post-detail__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 20px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+            background-color 0.15s,
+            border-color 0.15s;
+}
+
+.post-detail .post-detail__button--outline {
+    border-color: #dbe2ea;
+    background: #fff;
+    color: #475569;
+}
+
+.post-detail .post-detail__button--outline:hover:not(:disabled) {
+    border-color: #94a3b8;
+    background: #f8fafc;
+}
+
+.post-detail .post-detail__button--primary {
+    background: #2563eb;
+    color: #fff;
+}
+
+.post-detail .post-detail__button--primary:hover:not(:disabled) {
+    background: #1d4ed8;
+}
+
+.post-detail .post-detail__button--danger {
+    border-color: #fecaca;
+    background: #fff;
+    color: #dc2626;
+}
+
+.post-detail .post-detail__button--danger:hover:not(:disabled) {
+    background: #fef2f2;
+}
+
+.post-detail button:focus-visible {
+    outline: 3px solid #93c5fd;
+    outline-offset: 3px;
+}
+
+.post-detail button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.post-detail .post-detail__feedback {
+    padding: 56px 24px;
+    color: #64748b;
+    text-align: center;
+    line-height: 1.7;
+}
+
+.post-detail .post-detail__feedback p {
+    margin: 0 0 20px;
+}
+
+/* 모바일에서는 카드 여백과 제목 크기를 줄인다. */
+@media (max-width: 640px) {
+    .post-detail {
+        padding: 28px 16px 40px;
+    }
+
+    .post-detail .post-detail__page-header h1 {
+        font-size: 26px;
+    }
+
+    .post-detail .post-detail__page-header p {
+        font-size: 13px;
+    }
+
+    .post-detail .post-detail__card {
+        padding: 20px;
+    }
+
+    .post-detail .post-detail__article-header h2 {
+        font-size: 22px;
+    }
+
+    .post-detail .post-detail__meta {
+        gap: 8px 16px;
+        font-size: 12px;
+    }
+
+    .post-detail .post-detail__content {
+        min-height: 220px;
+        padding: 24px 0;
+        font-size: 15px;
+    }
+
+    .post-detail .post-detail__button {
+        padding: 0 14px;
+    }
+}

@@ -13,17 +13,30 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
+import java.util.UUID;
 
 //이 클래스는 JWT 토큰의 생성, 파싱(검증), 만료 시간 확인 등 토큰에 관련된 모든 지저분한 로직을 한데 모아 처리하는 일종의 '유틸리티 컴포넌트' 역할
+/**
+ * JWT 생성과 검증, 회원 정보 및 만료 시각 추출을 담당합니다.
+ *
+ * 주요 claim 구분:
+ * - sub: 로그인 아이디
+ * - id: 회원의 DB 기본키
+ * - role: 회원 권한 — Access Token에만 저장
+ * - jti: 토큰 자체의 고유번호 — 회원 ID와 별개
+ * - exp: 토큰 만료 시각
+ */
 @Component
 public class JwtTokenProvider {
 
     // 💡 application.properties 또는 yml 파일에 등록한 비밀키와 만료시간을 가져옴
 
-    private String secretKeyString; //비밀키 만들 문자열
-    private long accessTokenExpirationTime;
-    private long refreshTokenExpirationTime;
+    private final String secretKeyString; //비밀키 만들 문자열
+    private final long accessTokenExpirationTime;
+    private final long refreshTokenExpirationTime;
     private SecretKey secretKey; //비밀키객체
 
     public JwtTokenProvider(
@@ -56,52 +69,24 @@ public class JwtTokenProvider {
                 .add("role", role.name())
                 .build();
 
-        Date now = new Date();
-        Date validity = new Date(now.getTime() + accessTokenExpirationTime);
+        return createToken(claims,accessTokenExpirationTime);
 
-        return Jwts.builder()
-                .claims(claims)
-                .issuedAt(now)
-                .expiration(validity)
-                .signWith(secretKey, Jwts.SIG.HS256)
-                .compact();
     }
     //매개변수가 TokenMemberDto인 버전
-    public String createAccessToken(TokenMemberDto tokenMemberDto){
-        Claims claims = Jwts.claims()
-                .subject(tokenMemberDto.getMemberId())
-                .add("id", tokenMemberDto.getId())
-                .add("role", tokenMemberDto.getRole())
-                .build();
+    public String createAccessToken(TokenMemberDto dto){
 
-        Date now = new Date();
-        Date validity = new Date(now.getTime() + accessTokenExpirationTime);
-
-        return Jwts.builder()
-                .claims(claims)
-                .issuedAt(now)
-                .expiration(validity)
-                .signWith(secretKey, Jwts.SIG.HS256)
-                .compact();
+        return createAccessToken(dto.getId(),
+                dto.getMemberId(),
+                Role.valueOf(String.valueOf(dto.getRole())));
 
     }
 
     public String createAccessToken(Member member){
-        Claims claims= Jwts.claims()
-                .subject(member.getLoginId()) // 토큰 주인 (유저 ID) 유저아이디를 토큰의 주인(sub)으로 등록!
-                .add("id",member.getId()) //db pk값(long)
-                .add("role",member.getRole()) // 커스텀 데이터 (권한 등)
-                .build();
-
-        Date now= new Date();
-        Date validity=new Date(now.getTime()+ accessTokenExpirationTime);
-
-        return Jwts.builder()
-                .claims(claims)
-                .issuedAt(now)
-                .expiration(validity)
-                .signWith(secretKey,Jwts.SIG.HS256) //암호화 알고리즘 지정
-                .compact();
+        return createAccessToken(
+                member.getId(),
+                member.getLoginId(),
+                member.getRole()
+        );
     }
     //1. 📦 Payload (페이로드)란?
     //쉽게 말해 "토큰에 담아서 보낼 실제 데이터 상자(내용물)"입니다.
@@ -124,16 +109,7 @@ public class JwtTokenProvider {
                 .subject(loginId) //subject 자리에는 관례적으로 숫자인 PK보다 사용자를 식별할 수 있는 유니크한 문자열(아이디, 이메일 등)을 넣는 경우가 많음
                 .add("id",id) //누구의 재생성 열쇠인지 식별하기 위해 pk를 담음
                 .build();
-
-        Date now=new Date();
-        Date validity= new Date(now.getTime() + refreshTokenExpirationTime);
-
-        return Jwts.builder()
-                .claims(claims)
-                .issuedAt(now)
-                .expiration(validity)
-                .signWith(secretKey,Jwts.SIG.HS256)
-                .compact();
+        return createToken(claims,refreshTokenExpirationTime);
     }
 
     /**
@@ -144,19 +120,17 @@ public class JwtTokenProvider {
         return createRefreshToken(member.getId(), member.getLoginId());
     }
 
-    //authService에서 쓰는 메서드
-    public String createRefreshToken(String memberId) {
-        Claims claims = Jwts.claims()
-                .subject(memberId) // PK 값 저장
-                .build();
-
+    //accessToken과 refreshToken의 공통 메서드
+    private String createToken(Claims claims,long expirationMillis){
         Date now = new Date();
-        Date validity = new Date(now.getTime() + refreshTokenExpirationTime);
-
+        Date expiry = new Date(now.getTime() + expirationMillis);
         return Jwts.builder()
                 .claims(claims)
+                // 같은 회원이 같은 초에 요청하더라도
+                // 토큰 문자열이 서로 달라지도록 고유번호를 넣습니다.
+                .id(UUID.randomUUID().toString())
                 .issuedAt(now)
-                .expiration(validity)
+                .expiration(expiry)
                 .signWith(secretKey, Jwts.SIG.HS256)
                 .compact();
     }
@@ -164,21 +138,24 @@ public class JwtTokenProvider {
     //토큰에서 유저 loginId(subject)추출
     public String getLoginId(String token){
 
-        return Jwts.parser()
-                    .verifyWith(secretKey)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload()
-                    .getSubject();
+        return getClaims(token).getSubject();
     }
-    public String getId(String token){
+    /**
+     * 회원의 DB 기본키를 읽음.
+     *
+     * Claims.getId()는 jti, 즉 토큰 고유번호를 반환하므로
+     * 회원 ID를 얻기 위해 사용하면 안 됨
+     */
+    public Long getId(String token){
 
-        return Jwts.parser()
-                .verifyWith(secretKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getId();
+        Long memberId=getClaims(token).get("id", Long.class);
+
+        if(memberId==null){
+            throw new IllegalArgumentException(
+                    "토큰에 회원 id가 없습니다."
+            );
+        }
+        return memberId;
     }
 
     public Claims getClaims(String token){
@@ -190,13 +167,40 @@ public class JwtTokenProvider {
                 .getPayload();
     }
 
+    /**
+     * Access Token에 저장된 권한 문자열을 Enum으로 변환
+     * Refresh Token에는 role이 없으므로 이 메서드를 사용하지 않음
+     */
+    public Role getRole(String token) {
+        String role = getClaims(token).get("role", String.class);
+
+        if (role == null) {
+            throw new IllegalArgumentException(
+                    "토큰에 권한 정보가 없습니다."
+            );
+        }
+
+        return Role.valueOf(role);
+    }
+
+    /**
+     * 발급한 JWT의 실제 만료 시각을 DB 저장용으로 변환.
+     * 별도로 현재 시각에 7일을 더하지 않아 만료 기준이 일치.
+     *
+     * 현재 프로젝트의 LocalDateTime 저장 방식에 맞춰
+     * 서버 기본 시간대를 사용.
+     */
+    public LocalDateTime getExpiryDate(String token) {
+        return LocalDateTime.ofInstant(
+                getClaims(token).getExpiration().toInstant(),
+                ZoneId.systemDefault()
+        );
+    }
+
     //토큰 유효성 및 만료기간 검증
     public boolean validateToken(String token){
         try {
-            Jwts.parser()
-                    .verifyWith(secretKey)
-                    .build()
-                    .parseSignedClaims(token);
+            getClaims(token);
             return true;
         } catch (JwtException | IllegalArgumentException e){
             // 토큰이 변조되었거나, 만료되었거나, 비어있을 때 예외가 터짐

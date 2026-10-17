@@ -1,13 +1,18 @@
 package com.example.demo.repository.post;
 
 
+import com.example.demo.dto.ApiResponse;
 import com.example.demo.dto.PostDto;
 import com.example.demo.dto.home.PostSummaryResponse;
 import com.example.demo.ennum.PostSort;
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +26,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-import static com.example.demo.entity.QPost.post;
-import static com.example.demo.entity.QPostLike.postLike;
+import static com.example.demo.entity.Post.QPost.post;
+import static com.example.demo.entity.Post.QPostLike.postLike;
 import static com.example.demo.entity.QMember.member;
 import static com.example.demo.entity.item.QItemImage.itemImage;
 import static com.example.demo.dto.PostDto.searchRequestDto;
@@ -53,17 +58,44 @@ public class PostQueryRepository {
     private final JPAQueryFactory queryFactory;
 
     //선택한 게시글 1개 조회하기
-    public postDetailResponse findDetailPost(Long postId){
+    public postDetailResponse findDetailPost(Long postId,Long currentMemberId){
+
+
+        BooleanExpression likedExpression=
+                currentMemberId ==null
+                ? Expressions.FALSE
+                        : JPAExpressions
+                        .selectOne()
+                        .from(postLike)
+                        .where(
+                                postLike.post.id.eq(postId),
+                                postLike.member.id.eq(currentMemberId)
+                        )
+                        .exists();
+
+
         return queryFactory
                 .select(
-                        Projections.fields(
+                        Projections.constructor(
                                 postDetailResponse.class,
                                 post.id,
                                 post.title,
                                 post.content,
-                                post.member.loginId,
+                                post.member.id.as("authorId"),
+                                post.member.nickname,
+                                post.viewCount,
                                 postLike.count().as("likeCount"),// DTO 필드명과 매핑
-                                post.createdDate
+                                post.createdDate,
+                                /*
+                                 * 현재 사용자의 좋아요 여부
+                                 *
+                                 * 좋아요 기록이 존재하면 true,
+                                 * 존재하지 않으면 false
+                                 */
+                                new CaseBuilder()
+                                        .when(likedExpression)
+                                        .then(true)
+                                        .otherwise(false)
                         ))
                 .from(post)
                 .join(post.member,member)
@@ -74,55 +106,38 @@ public class PostQueryRepository {
                 .fetchOne();
     }
 
-    //모든 게시물 불러오기
-    public Page<postListResponse>findAllPost(Pageable pageable, PostSort sort){
 
-        List<postListResponse>content=queryFactory
-                .select(
-                        Projections.fields(
-                                postListResponse.class,
-                                post.id,
-                                post.title,
-                                postLike.count().as("likeCount"),
-                                post.member.loginId,
-                                post.createdDate
+
+    //게시물 목록,불러오기+검색하기
+    public Page<postListResponse> searchPosts(searchRequestDto requestDto, Pageable pageable, PostSort sort){
+
+        List<postListResponse> content=queryFactory
+                .select(Projections.constructor(
+                        postListResponse.class,
+                        post.id,
+                        post.title,
+                        post.viewCount,
+                        postLike.count().as("likeCount"),
+                        member.nickname,
+                        post.createdDate
                 ))
                 .from(post)
                 .join(post.member,member)
                 .leftJoin(postLike)
-                .on(postLike.post.eq(post)) //조인 조건
-                .orderBy(getOrderSpecifiers(sort))
-                .groupBy(post.id)
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-
-        JPAQuery<Long> countQuery=queryFactory
-                .select(post.count())
-                .from(post);
-
-        return PageableExecutionUtils.getPage(content,pageable,countQuery::fetchOne);
-    }
-
-
-    //제목으로 포스팅 검색하기
-    public Page<postListResponse>searchPosts(searchRequestDto requestDto, Pageable pageable,PostSort sort){
-
-        List<postListResponse> content=queryFactory
-                .select(Projections.fields(
-                        postListResponse.class,
-                        post.id,
-                        post.title,
-                        postLike.count().as("likeCount"),
-                        post.member.loginId,
-                        post.createdDate
-                        //여기에 nickname도 넣어줘야 함
-                ))
-                .from(post)
-                .join(post.member,member)
+                .on(postLike.post.eq(post))
                 .where(
                         titleContains(requestDto.title()),
                         createdAtAfter(requestDto.startDate())
+                )
+                /*
+                 * 좋아요 개수를 집계하기 위해 groupBy 사용.
+                 */
+                .groupBy(
+                        post.id,
+                        post.title,
+                        member.loginId,
+                        member.nickname,
+                        post.createdDate
                 )
                 .orderBy(getOrderSpecifiers(sort))
                 .offset(pageable.getOffset())

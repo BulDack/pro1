@@ -39,7 +39,7 @@ public class AuthController {
                 .secure(false) // HTTPS 환경 필수 (로컬 테스트 시 false로 조정 가능)
                 .path("/")
                 .maxAge(7*24*60*60) //쿠키 유효기간 7일
-                //.sameSite("Strict") csrf공격 방어
+                .sameSite("Lax") //csrf공격 방어
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE,cookie.toString());

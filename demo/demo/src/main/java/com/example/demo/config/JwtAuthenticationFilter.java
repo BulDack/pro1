@@ -45,8 +45,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 3. 토큰에서 주인(loginId)을 꺼냄.
             // 🔥 DB 조회 없이 토큰(Claims)에서 직접 값들을 꺼냄.
             String loginId= jwtTokenProvider.getLoginId(token);
-            Long id=jwtTokenProvider.getClaims(token).get("id", Long.class);
-            Role role=jwtTokenProvider.getClaims(token).get("role", Role.class);
+            Long id=jwtTokenProvider.getId(token);
+            Role role=jwtTokenProvider.getRole(token);
 
             //DB조회없이 PrincipalDetails 생성,JWT 전용 UserDetails 생성 메서드를 여기서 씀
             PrincipalDetails principleDetails=userDetailService.loadUserByTokenClaims(loginId,id,role);
