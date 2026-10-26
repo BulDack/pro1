@@ -6,6 +6,7 @@ import {
     likePost,
     unlikePost,
 } from "@/api/postApi";
+import PostComment from "@/components/post/PostComment.jsx";
 import "./PostDetail.css";
 
 function PostDetail() {
@@ -69,6 +70,7 @@ function PostDetail() {
 
         if (!window.confirm("게시글을 삭제하시겠습니까?")) return;
 
+        // 버튼 비활성화 및 처리 중 문구 표시
         setPendingAction("delete");
         setActionError("");
 
@@ -89,42 +91,72 @@ function PostDetail() {
         setPendingAction("like");
         setActionError("");
 
+        const wasLiked = Boolean(post.liked);
+
         try {
             // 서버에서 받은 현재 좋아요 상태에 따라
             // 좋아요 등록 또는 취소 API를 호출한다.
-            if (post.liked) {
+            if (wasLiked) {
                 await unlikePost(postId);
             } else {
                 await likePost(postId);
             }
+            /*
+         * 서버 요청이 성공한 다음에만
+         * React의 post 상태를 변경한다.
+         *
+         * 이전 post 객체의 다른 필드들은 유지하고,
+         * liked와 likeCount만 수정한다.
+         *
+         * setPost(prev => ...)
+         * → React가 관리하는 가장 최신 상태를 기준으로 변경한다.
+         */
+            setPost(prev => {
+
+                if (!prev) return prev;
+
+                return {
+                    ...prev,
+
+                    // 좋아요 상태 반전
+                    liked: !wasLiked,
+
+                    // 좋아요 추가 시 +1, 취소 시 -1
+                    likeCount: Math.max(
+                        0,
+                        (prev.likeCount ?? 0) + (wasLiked ? -1 : 1)
+                    )
+                };
+            });
+
         } catch (err) {
             console.error("좋아요 처리 실패:", err);
             setActionError(
                 "좋아요를 처리하지 못했습니다. 로그인 상태를 확인해 주세요."
             );
-            setPendingAction("");
-            return;
-        }
-
-        try {
-            // 변경 후 서버의 최신 좋아요 수와 상태를 다시 받아 표시한다.
-            const updatedPost = await getPost(postId);
-
-            if (!updatedPost) {
-                throw new Error("게시글 데이터가 없습니다.");
-            }
-
-            setPost(updatedPost);
-        } catch (err) {
-            console.error("좋아요 상태 조회 실패:", err);
-
-            // 좋아요 변경은 성공했지만 재조회가 실패한 경우를 구분한다.
-            setActionError(
-                "좋아요는 처리했지만 최신 상태를 불러오지 못했습니다. 새로고침해 주세요."
-            );
-        } finally {
+        }finally {
             setPendingAction("");
         }
+
+        // try {
+        //     // 변경 후 서버의 최신 좋아요 수와 상태를 다시 받아 표시한다.
+        //     const updatedPost = await getPost(postId);
+        //
+        //     if (!updatedPost) {
+        //         throw new Error("게시글 데이터가 없습니다.");
+        //     }
+        //
+        //     setPost(updatedPost);
+        // } catch (err) {
+        //     console.error("좋아요 상태 조회 실패:", err);
+        //
+        //     // 좋아요 변경은 성공했지만 재조회가 실패한 경우를 구분한다.
+        //     setActionError(
+        //         "좋아요는 처리했지만 최신 상태를 불러오지 못했습니다. 새로고침해 주세요."
+        //     );
+        // } finally {
+        //     setPendingAction("");
+        // }
     };
 
     // 서버의 LocalDateTime 문자열에서 날짜와 시·분만 표시한다.
@@ -288,6 +320,14 @@ function PostDetail() {
                         </div>
                     </footer>
                 </article>
+            )}
+            {/* 게시글 조회에 성공한 경우에만 댓글 영역을 표시한다.
+                key를 게시글 ID로 지정해 다른 게시글로 이동하면
+                댓글 입력값과 수정 상태를 새로 시작하도록 한다. */}
+            {!loading && !error && post && (
+                <PostComment
+                    key={postId}
+                    postId={postId}/>
             )}
         </section>
     );

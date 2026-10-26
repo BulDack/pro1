@@ -1,6 +1,7 @@
 package com.example.demo.service.post;
 
 import com.example.demo.dto.ApiResponse;
+import com.example.demo.dto.home.PostSummaryResponse;
 import com.example.demo.ennum.PostSort;
 import com.example.demo.entity.Post.Post;
 import com.example.demo.entity.Member;
@@ -20,6 +21,8 @@ import static com.example.demo.dto.PostDto.updateRequestDto;
 import static com.example.demo.dto.PostDto.searchRequestDto;
 import static com.example.demo.dto.PostDto.postListResponse;
 import static com.example.demo.dto.PostDto.postDetailResponse;
+import static com.example.demo.dto.my.MyResponse.PostResponse;
+
 
 @Service
 @Transactional(readOnly = true)
@@ -65,6 +68,9 @@ public class PostService {
         if(!post.getMember().getId().equals(memberId)){
             throw new IllegalArgumentException("삭제 권한이 없습니다.");
         }
+        //게시글과 연결된 좋아요 먼저 삭제
+        postLikeRepository.deleteAllByPostId(postId);
+        //게시글 삭제
         postRepository.delete(post);
     }
 
@@ -103,12 +109,12 @@ public class PostService {
     }
 
     //내 모든 게시글 보이기
-    public Page<postListResponse>getMyPost(Long memberId,Pageable pageable){
+    public Page<PostResponse>getMyPosts(Long memberId, Pageable pageable){
 
         Page<Post> posts=postRepository.findAllByMemberId(memberId,pageable);
 
         // Page 내부의 map 메서드로 Record DTO 변환
-        return posts.map(postListResponse::from);
+        return posts.map(PostResponse::from);
 
     }
 

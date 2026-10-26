@@ -1,5 +1,7 @@
 package com.example.demo.dto.home;
 
+import com.example.demo.entity.Post.Post;
+
 public record PostSummaryResponse(
 
         //게시글 상세이동pk

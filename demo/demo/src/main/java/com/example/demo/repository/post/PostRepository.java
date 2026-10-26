@@ -21,4 +21,14 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     where p.id = :postId
     """)
     int increaseViewCount(@Param("postId")Long postId);
+
+    @Modifying
+    @Query("UPDATE Post p SET p.likeCount = p.likeCount + 1 WHERE p.id = :postId")
+    void increaseLikeCount(@Param("postId") Long postId);
+
+    @Modifying
+    @Query("UPDATE Post p SET p.likeCount = p.likeCount - 1 WHERE p.id = :postId and p.likeCount > 0")
+    void decreaseLikeCount(@Param("postId") Long postId);
+
+    Page<Post> findByAllMemberId(Long memberId,Pageable pageable);
 }

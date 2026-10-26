@@ -28,6 +28,7 @@ public class Comment extends BaseTimeEntity {
     @JoinColumn(name="member_id")
     private Member member;
 
+
     @Builder
     public Comment(String content, Post post, Member member){
         this.content=content;

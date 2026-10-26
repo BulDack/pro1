@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import static com.example.demo.dto.login.MypageDto.MyPageResponse;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
@@ -57,6 +59,7 @@ public class MemberController {
                 .header(HttpHeaders.SET_COOKIE,refreshTokenCookie.toString())
                 .body(ApiResponse.success("로그인이 완료되었습니다.",responseBody));
     }
+
 
     //로그아웃 api
 

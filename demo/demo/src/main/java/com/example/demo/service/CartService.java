@@ -6,7 +6,7 @@ import com.example.demo.entity.item.CartItem;
 import com.example.demo.entity.item.Item;
 import com.example.demo.repository.order.CartItemRepository;
 import com.example.demo.repository.order.CartRepository;
-import com.example.demo.repository.ItemRepository;
+import com.example.demo.repository.item.ItemRepository;
 import com.example.demo.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;

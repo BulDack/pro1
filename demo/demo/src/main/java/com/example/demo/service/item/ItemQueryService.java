@@ -1,7 +1,7 @@
-package com.example.demo.service;
+package com.example.demo.service.item;
 
 
-import com.example.demo.repository.ItemQueryRepository;
+import com.example.demo.repository.item.ItemQueryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

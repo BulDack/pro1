@@ -1,18 +1,15 @@
-package com.example.demo.repository;
+package com.example.demo.repository.item;
 
-import com.example.demo.dto.ItemDto;
-import com.example.demo.dto.condition.ItemSearchCondition;
 import com.example.demo.dto.home.ItemSummaryResponse;
+import com.example.demo.ennum.ItemSort;
 import com.example.demo.ennum.SearchOperator;
+import com.example.demo.entity.QCategory;
+import com.example.demo.entity.ennum.ItemStatus;
 import com.example.demo.entity.ennum.OrderStatus;
-import com.example.demo.entity.item.Item;
 import com.example.demo.entity.item.QItemSearchAttribute;
-import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -25,16 +22,17 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
+
 import static com.example.demo.dto.ItemDto.ItemListResponse;
+import static com.example.demo.dto.ItemDto.ItemSearchRequest;
+import static com.example.demo.dto.ItemDto.ItemDetailResponse;
 import static com.example.demo.entity.QItemCategory.itemCategory;
 import static com.example.demo.entity.item.QItem.item;
+import static com.example.demo.entity.QCategory.category;
 import static com.example.demo.entity.QOrder.order;
 import static com.example.demo.entity.QOrderItem.orderItem;
 
 
-
-import static com.example.demo.ennum.SearchOperator.GOE;
 
 
 @Repository
@@ -43,57 +41,63 @@ public class ItemQueryRepository {
 
     private final JPAQueryFactory queryFactory;
 
-    public Page<ItemListResponse> searchItems(ItemSearchCondition cond,List<Long>categoryIds, Pageable pageable){
+    //아이템 목록들 조회(검색도 가능)
+    public Page<ItemListResponse> searchItems(ItemSearchRequest cond, Long categoryId, Pageable pageable, ItemSort sort){
 
         //1.실제 데이터 조회 쿼리
         List<ItemListResponse> content=queryFactory
-                .select(Projections.fields(
+                .select(Projections.constructor(
                         ItemListResponse.class,
                         item.id,
                         item.name,
-                        item.price
-                        //itemImage.imageUrl
+                        item.price,
+                        item.thumbnailUrl
                 ))
                 .from(item)
                 //// Item과 Category가 ItemCategory(다대다 중간 엔티티)로 연결된 경우 조인
-                .leftJoin(item.itemCategorys,itemCategory)
+                //.leftJoin(item.itemCategorys,itemCategory)
                 .where(
-//                        nameLike(cond.getName())
-                        item.name.eq(cond.getName()),
-                        item.price.between(cond.getPriceGoe(),cond.getPriceLoe()),
-                        categoryIn(categoryIds),
+                       //nameLike(cond.getName())
+                        nameContains(cond.name()),
+                        priceGoe(cond.priceGoe()),
+                        priceLoe(cond.priceLoe()),
+                        categoryIn(categoryId),
+                        item.status.eq(ItemStatus.ACTIVE)
 
                         // ★ 핵심 속성 테이블(Key-Value)에 대응하는 동적 서브쿼리들
-                        hasAttribute("MINRAM",cond.getClothingSize()),
-                        hasAttribute("COLOR",cond.getColor()),
-                        hasAttribute("MINRAM",cond.getMinRam(), GOE)
+                        //hasAttribute("MINRAM",cond.getClothingSize()),
+                        //hasAttribute("COLOR",cond.getColor()),
+                        //hasAttribute("MINRAM",cond.getMinRam(), GOE)
 
                 )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(getOrderBy(cond.getSortBy()))
+                .orderBy(getOrderBy(sort.name()))
                 .fetch();
 
         //2.전체 데이터 개수(COUNT)조회 쿼리
         JPAQuery<Long> countQuery= queryFactory
                 .select(item.count())
-                .leftJoin(item.itemCategorys,itemCategory)
+                //.leftJoin(item.itemCategorys,itemCategory)
                 .from(item)
                 .where(
-                        item.name.eq(cond.getName()),
-                        item.price.between(cond.getPriceGoe(),cond.getPriceLoe()),
-                        categoryIn(categoryIds),
+                        nameContains(cond.name()),
+                        priceGoe(cond.priceGoe()),
+                        priceLoe(cond.priceLoe()),
+                        categoryIn(categoryId),
+                        item.status.eq(ItemStatus.ACTIVE)
 
                         // ★ 핵심 속성 테이블(Key-Value)에 대응하는 동적 서브쿼리들
-                        hasAttribute("MINRAM",cond.getClothingSize()),
-                        hasAttribute("COLOR",cond.getColor()),
-                        hasAttribute("MINRAM",cond.getMinRam(), GOE)
+                        //hasAttribute("MINRAM",cond.getClothingSize()),
+                        //hasAttribute("COLOR",cond.getColor()),
+                        //hasAttribute("MINRAM",cond.getMinRam(), GOE)
                 );
         //3.page객체 생성및 반환(최적화가능)
          return PageableExecutionUtils.getPage(content,pageable,countQuery::fetchOne);
 
     }
 
+    //메인화면에 찜 높은순으로 보여지는 쿼리
     public List<ItemSummaryResponse> findPopularItems(int limit) {
 
         LocalDateTime sevenDaysAgo =
@@ -104,27 +108,30 @@ public class ItemQueryRepository {
                         item.id,
                         item.name,
                         item.price,
-                        item.thumbnailUrl))
-                .from(orderItem)
+                        item.thumbnailUrl,
+                        item.likeCount))
+                .from(item)
+                //.from(orderItem)
                 //orderItem이 어떤상품인지 정보를 알기위해 item과 이너조인
-                .join(orderItem.item,item)
+                //.join(orderItem.item,item)
                 //최근 7일주문인지 확인하려면 order의 주문일시가 필요
-                .join(orderItem.order,order)
-                .where(order.orderdate.goe(sevenDaysAgo),
-                        order.status.eq(OrderStatus.COMPLETE))
-                .groupBy(
-                        item.id,
-                        item.name,
-                        item.price,
-                        item.thumbnailUrl
-                )
-                .orderBy(orderItem.count.sum().asc())
+                //.join(orderItem.order,order)
+                //.where(order.orderdate.goe(sevenDaysAgo),
+                //        order.status.eq(OrderStatus.COMPLETE))
+//                .groupBy(
+//                        item.id,
+//                        item.name,
+//                        item.price,
+//                        item.thumbnailUrl
+//                )
+//                .orderBy(Item.count.sum().asc())
+                .where(item.status.eq(ItemStatus.ACTIVE))
+                .orderBy(item.likeCount.desc())
                 .limit(limit)
                 .fetch();
-
-
     }
 
+    //메인화면에 신상품 순으로 보여지는 쿼리
     public List<ItemSummaryResponse> findNewItems(int limit) {
 
         return queryFactory
@@ -132,19 +139,99 @@ public class ItemQueryRepository {
                         item.id,
                         item.name,
                         item.price,
-                        item.thumbnailUrl))
+                        item.thumbnailUrl,
+                        item.likeCount))
                 .from(item)
+                .where(item.status.eq(ItemStatus.ACTIVE))
                 .orderBy(item.createdDate.desc())
                 .limit(limit)
                 .fetch();
 
     }
 
+    /*
+     * 상품명 검색 조건
+     *
+     * 1. name == null
+     *    → 검색 조건 자체가 전달되지 않은 경우
+     *
+     * 2. name.isBlank()
+     *    → 빈 문자열이나 공백만 전달된 경우
+     *
+     * 위 두 상황에서는 검색 조건을 적용하지 않도록
+     * BooleanExpression 대신 null을 반환한다.
+     *
+     * QueryDSL의 where()는 null인 조건을 무시한다.
+     */
+    private BooleanExpression nameContains(String name){
+        return name==null || name.isBlank()
+                ? null
+                : item.name.containsIgnoreCase(name);
+    }
+    /*
+     * 최소 가격 검색 조건
+     *
+     * price가 null이면 최소 가격 제한을 적용하지 않는다.
+     * 0원은 유효한 값이므로 null 여부만 검사한다.
+     */
+    private BooleanExpression priceGoe(Integer price) {
+        return price == null
+                ? null
+                : item.price.goe(price);
+    }
 
-    private BooleanExpression categoryIn(List<Long> categoryIds) {
-        return (categoryIds !=null && !categoryIds.isEmpty())
-                ?itemCategory.category.id.in(categoryIds)
-                :null;
+    /*
+     * 최대 가격 검색 조건
+     *
+     * price가 null이면 최대 가격 제한을 적용하지 않는다.
+     */
+    private BooleanExpression priceLoe(Integer price) {
+        return price == null
+                ? null
+                : item.price.loe(price);
+    }
+
+
+    private BooleanExpression categoryIn(Long categoryId) {
+        if (categoryId == null){
+
+            System.out.println("카테고리 검색 조건 없음");
+            return null;
+        }
+
+        QCategory category = new QCategory("searchCategory");
+        QCategory parent = new QCategory("parentCategory");
+        QCategory grandParent = new QCategory("grandParentCategory");
+
+        /*
+         * EXISTS 서브쿼리
+         *
+         * 현재 조회 중인 Item이 categoryIds에 포함된
+         * 카테고리 중 하나에 연결되어 있는지 확인한다.
+         *
+         * itemCategory.item.eq(item)
+         * → 현재 바깥쪽 쿼리의 Item과 연결된 데이터인지 확인
+         *
+         * itemCategory.category.id.in(categoryIds)
+         * → 전달받은 카테고리 목록 중 하나와 일치하는지 확인
+         *
+         * EXISTS
+         * → 조건을 만족하는 ItemCategory가 하나 이상 있으면 true
+         */
+        return JPAExpressions
+                .selectOne()
+                .from(itemCategory)
+                .join(itemCategory.category,category)
+                .leftJoin(category.parent,parent)
+                .leftJoin(parent.parent,grandParent) //셀프조인(카테고리 부모의 부모를 조인해옴)
+                .where(
+                        itemCategory.item.eq(item), //현재 조회중인 상품에 연결된 카테고리인지 확인
+                        itemCategory.category.id.in(categoryId)
+                                .or(parent.id.in(categoryId))
+                                .or(grandParent.id.in(categoryId))
+
+                )
+                .exists();
     }
     /**
      * Key-Value 형태의 검색 속성 테이블을 필터링하기 위한 동적 서브쿼리 생성기

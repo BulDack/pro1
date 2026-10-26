@@ -3,9 +3,7 @@ package com.example.demo.dto;
 import com.example.demo.entity.Category;
 import com.example.demo.entity.item.Item;
 import com.example.demo.entity.item.ItemSearchAttribute;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,114 +23,162 @@ import java.util.List;
 public final class ItemDto {
 
     // 1. 상품 등록 요청 DTO
-    @Getter
-    @NoArgsConstructor
-    public static class CreateRequest{
-        @NotBlank
-        private String name;
-        @Positive
-        private Integer price;
-        @NotNull
-        private Integer stockQuantity;
-        private String description;
-        @NotNull
-        private Long categoryId;
-        private List<AttributeDto>attributes;
+//    @Getter
+//    @NoArgsConstructor
+//    public static class CreateRequest{
+//        @NotBlank
+//        private String name;
+//        @Positive
+//        private Integer price;
+//        @NotNull
+//        private Integer stockQuantity;
+//        private String description;
+//        @NotNull
+//        private Long categoryId;
+//        private List<AttributeDto>attributes;
+//
+//        //dto->엔티티 변환 편의 메서드
+//        public List<ItemSearchAttribute>toAttributeEntries(Item item){
+//            if(this.attributes==null)return List.of();
+//
+//            return this.attributes.stream()
+//                    .map(dto->{
+//                        if(dto.stringValue()!=null){
+//                            return ItemSearchAttribute.createNumberAttribute(item, dto.key(), dto.numberValue());
+//                        }else{
+//                            return ItemSearchAttribute.createStringAttribute(item,dto.key(),dto.stringValue());
+//                        }
+//                    }).toList();
+//        }
+//    }
 
-        //dto->엔티티 변환 편의 메서드
-        public List<ItemSearchAttribute>toAttributeEntries(Item item){
-            if(this.attributes==null)return List.of();
 
-            return this.attributes.stream()
-                    .map(dto->{
-                        if(dto.stringValue()!=null){
-                            return ItemSearchAttribute.createNumberAttribute(item, dto.key(), dto.numberValue());
-                        }else{
-                            return ItemSearchAttribute.createStringAttribute(item,dto.key(),dto.stringValue());
-                        }
-                    }).toList();
-        }
-    }
+//    @Getter
+//    @NoArgsConstructor
+//    // 2. 상품 수정 요청 DTO
+//    public static class UpdateRequest{
+//        private String name;
+//        private Integer price;
+//        private Integer stockQuantity;
+//        private String description;
+//        private List<AttributeDto>attributes;
+//
+//        public List<ItemSearchAttribute>toAttributeEntries(Item item){
+//            if(this.attributes==null)return List.of();
+//
+//            return this.attributes.stream()
+//                    .map(dto->{
+//                        if(dto.stringValue()!=null){
+//                            return ItemSearchAttribute.createNumberAttribute(item, dto.key(), dto.numberValue());
+//                        }else{
+//                            return ItemSearchAttribute.createStringAttribute(item,dto.key(),dto.stringValue());
+//                        }
+//                    }).toList();
+//        }
+//    }
 
-    @Getter
-    @NoArgsConstructor
-    // 2. 상품 수정 요청 DTO
-    public static class UpdateRequest{
-        private String name;
-        private Integer price;
-        private Integer stockQuantity;
-        private String description;
-        private List<AttributeDto>attributes;
+    public record ItemUpdateRequest(
+            String name,
+            Integer price,
+            Integer stockQuantity,
+            String description
+            //추후에 상품화면에 들어갈 잡다한 json도 추가
 
-        public List<ItemSearchAttribute>toAttributeEntries(Item item){
-            if(this.attributes==null)return List.of();
-
-            return this.attributes.stream()
-                    .map(dto->{
-                        if(dto.stringValue()!=null){
-                            return ItemSearchAttribute.createNumberAttribute(item, dto.key(), dto.numberValue());
-                        }else{
-                            return ItemSearchAttribute.createStringAttribute(item,dto.key(),dto.stringValue());
-                        }
-                    }).toList();
-        }
-    }
+    ){}
 
     // 3. 상품 목록 조회 응답 DTO
     public record ItemListResponse(
             Long id,
             String name,
             int price,
-            List<String> imageUrls
+            String imageUrls
     ) {
     }
+    //상품목록 조회 요청 dto
+    public record ItemSearchRequest(
+            String name,
+            Integer priceGoe,
+            Integer priceLoe,
+            Long categoryId
+    ){}
 
     //상품 단건 조회 응답 dto
-    public record ItemResponse(
+    public record ItemDetailResponse(
             Long id,
             String name,
-            int price
+            int price,
+            List<String> imageUrls,
+            String description,
+            int likeCount,
+            boolean liked
+
     ) {
     }
 
+    //상품 등록 요청 dto
+    public record ItemCreateRequest(
+            @NotBlank
+            @Size(max=200)
+            String name,
 
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class CreateReponse{
+            @NotNull
+            @PositiveOrZero
+            Integer price,
 
-        private Long id; // 👈 서버에서 생성된 고유 ID (프론트가 다음 페이지 이동 시 필수)
-        private String name;
-        private Integer price;
-        private String description;
-        private Integer stockQuantity;
+            @NotBlank
+            String description,
 
-        // 💡 누가 등록했는지 프론트가 알 수 있도록 최소한의 정보만 노출 (순환참조 방지)
-        private Long sellerId;
-        private String sellerName;
+            @NotNull
+            @PositiveOrZero
+            int stockQuantity,
 
-        private LocalDateTime createAt; //등록시간
+            String thumbnailUrl,
 
-        /**
-         * 엔티티(Entity)를 DTO로 안전하게 변환해주는 편의 메서드 (팩토리 메서드 패턴)
-         */
-        public static CreateReponse from(Item item){
-            return CreateReponse.builder()
-                    .id(item.getId())
-                    .name(item.getName())
-                    .price(item.getPrice())
-                    .description(item.getDescription())
-                    .stockQuantity(item.getStockQuantity())
+            //List<String> imageUrl, //상품 상세페이지에 들어갈 상품 사진들 일단 추후에 추가
+
+            @NotNull
+            Long categoryId
+    ){
+    }
+
+
+//    @Getter
+//    @NoArgsConstructor
+//    @AllArgsConstructor
+//    @Builder
+//    public static class CreateResponse{
+//
+//        private Long id; // 👈 서버에서 생성된 고유 ID (프론트가 다음 페이지 이동 시 필수)
+//        private String name;
+//        private Integer price;
+//        private String description;
+//        private Integer stockQuantity;
+//
+//        // 💡 누가 등록했는지 프론트가 알 수 있도록 최소한의 정보만 노출 (순환참조 방지)
+//        private Long sellerId;
+//        private String sellerName;
+//
+//        private LocalDateTime createAt; //등록시간
+//
+//        /**
+//         * 엔티티(Entity)를 DTO로 안전하게 변환해주는 편의 메서드 (팩토리 메서드 패턴)
+//         */
+//        public static CreateResponse from(Item item){
+//            return CreateResponse.builder()
+//                    .id(item.getId())
+//                    .name(item.getName())
+//                    .price(item.getPrice())
+//                    .description(item.getDescription())
+//                    .stockQuantity(item.getStockQuantity())
                     // item.getMember()가 null이 아닐 때만 안전하게 가져오기 (관리자 공용 상품일 경우 대비)
 //                    .sellerId(item.getMember() != null ? item.getMember().getId() : null)
 //                    .sellerName(item.getMember() != null ? item.getMember().getLoginId() : "SYSTEM(ADMIN)")
 //                    .createdAt(item.getCreatedAt()) // BaseEntity를 쓰신다면 존재
-                    .build();
+                 //   .build();
 
-        }
-
-    }
+//        }
+//
+//    }
 
 
 

@@ -84,7 +84,7 @@ public class PostQueryRepository {
                                 post.member.id.as("authorId"),
                                 post.member.nickname,
                                 post.viewCount,
-                                postLike.count().as("likeCount"),// DTO 필드명과 매핑
+                                post.likeCount,//postLike.count().as("likeCount"),// DTO 필드명과 매핑
                                 post.createdDate,
                                 /*
                                  * 현재 사용자의 좋아요 여부
@@ -117,13 +117,13 @@ public class PostQueryRepository {
                         post.id,
                         post.title,
                         post.viewCount,
-                        postLike.count().as("likeCount"),
+                        post.likeCount,
                         member.nickname,
                         post.createdDate
                 ))
                 .from(post)
                 .join(post.member,member)
-                .leftJoin(postLike)
+                .leftJoin(postLike) //굳이 없어도 될텐데 일단 납둠
                 .on(postLike.post.eq(post))
                 .where(
                         titleContains(requestDto.title()),

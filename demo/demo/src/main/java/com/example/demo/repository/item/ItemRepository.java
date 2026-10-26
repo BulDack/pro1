@@ -1,11 +1,12 @@
-package com.example.demo.repository;
+package com.example.demo.repository.item;
 
 import com.example.demo.entity.item.Item;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
-import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -26,6 +27,16 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     @Query("SELECT i FROM Item i WHERE i.id IN :ids")
     List<Item> findAllByIdInWithPessimisticLock(@Param("ids") List<Long> ids);
 
+
+    @Modifying
+    @Query("UPDATE Item i set i.likeCount = i.likeCount + 1 where i.id = :itemId")
+    void increaseLikeCount(@Param("itemId")Long itemId);
+
+    @Modifying
+    @Query("UPDATE Item i set i.likeCount = i.likeCount - 1 where i.id = :itemId and i.likeCount > 0")
+    void decreaseLikeCount(@Param("itemId")Long itemId);
+
+    Page<Item> findByMemberId(Long memberId, Pageable pageable);
 
 
 //    private final EntityManager em;

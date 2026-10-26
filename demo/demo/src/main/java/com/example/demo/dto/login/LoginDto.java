@@ -31,6 +31,7 @@ public final class LoginDto {
 
         String accessToken;
         String username;
+//        String role; //여기서 보내는건 그냥 프론트엔드 버튼 활성화용도 정도에 불과,검증은 결국 백엔드에서
     }
 
 

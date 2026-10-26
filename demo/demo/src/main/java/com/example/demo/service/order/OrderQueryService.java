@@ -1,4 +1,4 @@
-package com.example.demo.service;
+package com.example.demo.service.order;
 
 import com.example.demo.dto.OrderDto;
 import com.example.demo.repository.order.OrderQueryRepository;

@@ -11,7 +11,9 @@ public record ItemSummaryResponse(
         int price,
 
         //대표이미지 1장만 사용
-        String thumbnailUrl
+        String thumbnailUrl,
+
+        int likeCount
 
 ){
 }

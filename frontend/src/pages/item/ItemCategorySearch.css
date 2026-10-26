@@ -1,0 +1,143 @@
+/* CategoryFilter.jsx와 같은 폴더에 둔다. 컴포넌트에서 직접 import한다.
+ * 전역 button/label 스타일을 바꾸지 않고 필터 내부에만 적용한다.
+ * 흰색 바탕 + 따뜻한 주황 포인트로 기존 크림색 상품 페이지와 연결한다. */
+.item-category-filter.item-category-filter {
+    --category-ink: #352e29;
+    --category-muted: #71675f;
+    --category-accent: #ae4324;
+    --category-line: #ebe4dc;
+    box-sizing: border-box;
+    grid-column: 1 / -1;
+    min-width: 0;
+    width: 100%;
+    margin: 0 0 8px;
+    padding: 0;
+    border: 1px solid var(--category-line);
+    border-radius: 20px;
+    background: #fff;
+    color: var(--category-ink);
+    box-shadow: 0 6px 24px #44301d06;
+    font-family: inherit;
+    line-height: 1.5;
+}
+.item-category-filter *, .item-category-filter *::before, .item-category-filter *::after { box-sizing: border-box; }
+
+/* 화면에서만 숨긴다. legend와 선택 안내는 보조기기에서 계속 읽을 수 있다. */
+.item-category-filter .item-category-sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    margin: -1px; padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+.item-category-filter .item-category-heading { margin: 0; font-size: inherit; }
+.item-category-filter button, .item-category-filter select { font: inherit; }
+.item-category-filter button { cursor: pointer; }
+.item-category-filter .item-category-toggle {
+    display: flex; align-items: center; gap: 14px;
+    width: 100%; min-height: 94px;
+    margin: 0; padding: 22px 24px;
+    border: 0; border-radius: 20px 20px 0 0;
+    background: transparent; color: var(--category-ink);
+    text-align: left;
+    transition: background-color .18s ease;
+}
+.item-category-filter .item-category-toggle:hover:not(:disabled) { background: #fffcf8; }
+.item-category-filter .item-category-icon {
+    display: grid; place-items: center; flex: 0 0 44px; height: 44px;
+    border: 1px solid #f2dfcf; border-radius: 14px;
+    background: #fff5e9; color: var(--category-accent);
+}
+.item-category-filter .item-category-icon svg { width: 23px; height: 23px; }
+.item-category-filter .item-category-heading-copy { display: grid; gap: 3px; min-width: 0; }
+.item-category-filter .item-category-title { font-size: 17px; font-weight: 750; letter-spacing: -.5px; }
+.item-category-filter .item-category-subtitle { color: var(--category-muted); font-size: 12px; font-weight: 400; overflow-wrap: anywhere; }
+.item-category-filter .item-category-toggle-label { margin-left: auto; color: var(--category-muted); font-size: 12px; font-weight: 500; white-space: nowrap; }
+.item-category-filter .item-category-chevron {
+    display: grid; place-items: center; flex: 0 0 30px; height: 30px;
+    border: 1px solid var(--category-line); border-radius: 50%; color: var(--category-muted);
+    transition: transform .2s ease;
+}
+.item-category-filter .item-category-chevron svg { width: 18px; height: 18px; }
+.item-category-filter .item-category-toggle[aria-expanded='true'] .item-category-chevron { transform: rotate(180deg); }
+
+/* 요약은 토글과 독립적이다. 긴 경로도 줄바꿈되어 모바일 너비를 넘지 않는다. */
+.item-category-filter .item-category-summary { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 16px; padding: 0 24px 20px; }
+.item-category-filter .item-category-selection { display: flex; align-items: center; flex-wrap: wrap; flex: 1; gap: 8px 12px; min-width: 0; margin: 0; }
+.item-category-filter .item-category-chip {
+    display: inline-flex; max-width: 100%; padding: 5px 12px;
+    border: 1px solid #f0d7c4; border-radius: 999px;
+    background: #fff5ec; color: var(--category-accent);
+    font-size: 12px; font-weight: 700; overflow-wrap: anywhere;
+}
+.item-category-filter .item-category-path { color: var(--category-muted); font-size: 12px; overflow-wrap: anywhere; }
+.item-category-filter .item-category-reset {
+    display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+    min-height: 44px; padding: 7px 12px;
+    border: 1px solid var(--category-line); border-radius: 10px;
+    background: #fff; color: var(--category-muted); font-size: 12px;
+}
+.item-category-filter .item-category-reset:hover:not(:disabled) { background: #fff5ec; color: var(--category-accent); }
+
+/* hidden을 명시해 다른 페이지의 display 규칙이 접힌 패널을 노출하지 않게 한다. */
+.item-category-filter .item-category-content[hidden] { display: none; }
+.item-category-filter .item-category-content { margin: 0 24px; padding: 20px 0 0; border-top: 1px solid var(--category-line); }
+.item-category-filter .item-category-guide { margin: 0 0 22px; color: var(--category-muted); font-size: 12px; }
+.item-category-filter .item-category-step-label,
+.item-page .item-category-filter label > .item-category-step-label {
+    display: flex; align-items: center; gap: 7px;
+    margin: 0 0 10px; padding: 0; color: var(--category-ink); font-size: 13px; font-weight: 700;
+}
+.item-category-filter .item-category-step-label > span {
+    color: var(--category-accent); font-size: 10px; font-weight: 700; letter-spacing: .5px;
+}
+.item-category-filter .item-category-root-buttons { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 24px; }
+.item-category-filter .item-category-root-buttons button {
+    display: flex; align-items: center; justify-content: space-between; gap: 6px;
+    min-width: 0; min-height: 48px; padding: 12px 14px;
+    border: 1px solid var(--category-line); border-radius: 12px;
+    background: #fff; color: var(--category-muted); font-size: 13px; font-weight: 600;
+    text-align: left; overflow-wrap: anywhere;
+    transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+}
+.item-category-filter .item-category-root-buttons button:hover:not(:disabled) { border-color: #d79775; background: #fffcf8; }
+/* 색뿐 아니라 체크 표시·굵기도 바꿔 선택 상태를 구분한다. */
+.item-category-filter .item-category-root-buttons button[aria-pressed='true'] { border-color: var(--category-accent); background: #fff1e5; color: var(--category-accent); font-weight: 750; }
+.item-category-filter .item-category-check { visibility: hidden; flex-shrink: 0; }
+.item-category-filter [aria-pressed='true'] .item-category-check { visibility: visible; }
+.item-category-filter .item-category-detail-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.item-category-filter .item-category-detail-fields label { display: block; min-width: 0; }
+.item-category-filter .item-category-detail-fields select {
+    display: block; width: 100%; min-width: 0; min-height: 48px;
+    margin: 0; padding: 10px 12px;
+    border: 1px solid #dcd4ca; border-radius: 12px;
+    background: #fff; color: var(--category-ink); font-size: 13px; cursor: pointer;
+    /* 네이티브 화살표·선택창을 유지해 운영체제의 키보드 조작을 그대로 지원한다. */
+}
+.item-category-filter .item-category-detail-fields select:disabled { background: #f5f3ef; color: #786e65; cursor: not-allowed; }
+.item-category-filter .item-category-footer { margin: 20px 0 0; padding: 14px 0 18px; border-top: 1px dashed var(--category-line); color: var(--category-muted); font-size: 11px; }
+.item-category-filter button:focus-visible, .item-category-filter select:focus-visible { outline: 3px solid #ae4324; outline-offset: 3px; }
+.item-category-filter button:disabled { opacity: .5; cursor: not-allowed; }
+
+/* 600px 이하는 대분류 2열, 세부 분류 1열로 바꿔 터치 영역을 확보한다. */
+@media (max-width: 600px) {
+    .item-category-filter .item-category-toggle { min-height: 86px; padding: 18px 16px; gap: 10px; }
+    .item-category-filter .item-category-summary { padding: 0 16px 16px; }
+    .item-category-filter .item-category-content { margin: 0 16px; padding-top: 18px; }
+    .item-category-filter .item-category-root-buttons { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .item-category-filter .item-category-detail-fields { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    .item-category-filter .item-category-subtitle { font-size: 11px; }
+    .item-category-filter .item-category-toggle-label { font-size: 11px; }
+}
+@media (max-width: 360px) {
+    .item-category-filter .item-category-toggle-label { display: none; }
+    .item-category-filter .item-category-chevron { margin-left: auto; }
+}
+/* 사용자가 움직임 감소를 선택한 환경에서는 회전·색 전환 효과를 생략한다. */
+@media (prefers-reduced-motion: reduce) {
+    .item-category-filter * { transition: none; }
+}
+/* 기존 상품 검색 화면의 로딩용 fieldset 규칙을 함께 유지한다. */
+.item-page .item-category-load { min-width: 0; margin: 0; padding: 0; border: 0; }

@@ -21,7 +21,9 @@ function PostSection({ id, title, description, posts }) {
                         <li key={post.postId} className="main-post-row">
                             <span className="main-post-number">{String(index + 1).padStart(2, '0')}</span>
                             <div className="main-post-content">
-                                <h3>{post.title}</h3>
+                                <Link to={`/posts/${post.postId}`}>
+                                    <h3>{post.title}</h3>
+                                </Link>
                                 <p>{post.nickname || '작성자 미상'}</p>
                             </div>
                             <div className="main-post-stats">
@@ -43,7 +45,10 @@ function ProductImage({ url, name }) {
     }
     // 서버가 반환하는 /uploads/... 상대 경로도 백엔드 주소 기준으로 표시합니다.
     const imageUrl = new URL(url, 'http://localhost:8080/uploads').href;
-    return <img src={imageUrl} alt={name} loading="lazy" onError={() => setFailed(true)} />;
+    return <img src={imageUrl} alt={name} loading="lazy" onError={() => {
+        console.error("이미지 로딩 실패:", url);
+        setFailed(true);
+    }} />;
 }
 
 function ItemSection({ id, title, description, items, badge }) {
@@ -60,7 +65,9 @@ function ItemSection({ id, title, description, items, badge }) {
                     {items.map((item) => (
                         <li key={item.id} className="main-item-card">
                             <div className="main-item-image">
-                                <ProductImage key={item.thumbnailUrl} url={item.thumbnailUrl} name={item.name} />
+                                <Link to={`/items/${item.id}`}>
+                                    <ProductImage key={item.thumbnailUrl} url={item.thumbnailUrl} name={item.name} />
+                                </Link>
                                 <span className="main-item-badge">{badge}</span>
                             </div>
                             <h3>{item.name}</h3>
@@ -110,12 +117,28 @@ export default function MainPage() {
                     <p className="main-page-label">KIRBY WORLD</p>
                     <h1>오늘의 이야기를 만나보세요.</h1>
                     <p>새로운 이야기부터 인기 상품까지, 한곳에서 둘러보세요.</p>
-                    <nav
-                        aria-label="목록 바로가기"
-                        style={{ display: 'flex', gap: '16px', marginTop: '16px' }}
-                    >
-                        <Link to="/posts">게시글 목록</Link>
-                        <Link to="/items">상품 목록</Link>
+                    {/* 목록 이동은 Link를 유지한다. 아이콘은 장식이므로 보조기기에서 숨긴다. */}
+                    <nav className="main-quick-links" aria-label="목록 바로가기">
+                        <Link to="/posts" className="main-quick-link main-quick-link-posts">
+                            <svg className="main-quick-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <rect x="4" y="3" width="16" height="18" rx="3" />
+                                <path d="M8 8h8M8 12h8M8 16h5" />
+                            </svg>
+                            <span>게시글 목록</span>
+                            <svg className="main-quick-link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <path d="M5 12h14m-6-6 6 6-6 6" />
+                            </svg>
+                        </Link>
+                        <Link to="/items" className="main-quick-link main-quick-link-items">
+                            <svg className="main-quick-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <path d="M5 7h14l1 14H4L5 7Z" />
+                                <path d="M9 9V6a3 3 0 0 1 6 0v3" />
+                            </svg>
+                            <span>상품 목록</span>
+                            <svg className="main-quick-link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <path d="M5 12h14m-6-6 6 6-6 6" />
+                            </svg>
+                        </Link>
                     </nav>
                 </header>
                 {isLoading ? (

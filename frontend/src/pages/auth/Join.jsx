@@ -1,161 +1,198 @@
-import React, { useState } from 'react';
-import {useNavigate,Link} from 'react-router-dom';
-import {validateEmail,validatePassword} from "@/utils/validation.js";
-import api from '@/services/api.js';
+import { useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { authApi } from '@/services/api.js';
+import { validateEmail, validatePassword } from '@/utils/validation.js';
+import './Join.css';
 
-const Join = () => {
-  const [formData, setFormData] = useState({
-    username: '',
-    loginId: '', // JoinRequestDto 필드에 맞게 수정하세요
-    password: '',
-    passwordConfirm: '', //패스워드 확인값은 굳이 보낼필요 없음
-    email: '',
-  });
+// DTO의 8개 필드와 화면에서만 사용하는 비밀번호 확인값을 모두 초기화한다.
+const INITIAL_FORM = {
+  username: '',
+  nickname: '',
+  loginId: '',
+  password: '',
+  passwordConfirm: '',
+  email: '',
+  city: '',
+  street: '',
+  zipcode: '',
+};
 
-  const [errorMessage,setErrorMessage]=useState('');
-  const [isLoading,setIsLoading]=useState(false);
+// 반복되는 입력창의 속성을 모은다. 필수 여부는 화면 정책이며,
+// 현재 DTO에서 검증 어노테이션이 붙은 필드는 username뿐이다.
+const ACCOUNT_FIELDS = [
+  { name: 'username', label: '이름', autoComplete: 'name', required: true, placeholder: '이름을 입력해 주세요' },
+  { name: 'nickname', label: '닉네임', autoComplete: 'nickname', placeholder: '사용할 닉네임을 입력해 주세요' },
+  { name: 'loginId', label: '아이디', autoComplete: 'username', required: true, placeholder: '로그인에 사용할 아이디' },
+  { name: 'email', label: '이메일', type: 'email', autoComplete: 'email', required: true, placeholder: 'example@email.com' },
+  { name: 'password', label: '비밀번호', type: 'password', autoComplete: 'new-password', required: true, placeholder: '8자 이상 입력해 주세요' },
+  { name: 'passwordConfirm', label: '비밀번호 확인', type: 'password', autoComplete: 'new-password', required: true, placeholder: '비밀번호를 한 번 더 입력해 주세요' },
+];
 
-  const navigate=useNavigate();
+const ADDRESS_FIELDS = [
+  { name: 'city', label: '도시', autoComplete: 'address-level1', placeholder: '예: 서울특별시' },
+  { name: 'zipcode', label: '우편번호', autoComplete: 'postal-code', placeholder: '예: 01234' },
+  { name: 'street', label: '도로명·상세주소', autoComplete: 'address-line1', placeholder: '도로명과 상세주소를 입력해 주세요', wide: true },
+];
 
+export default function Join() {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState(INITIAL_FORM);
+  const [errors, setErrors] = useState({});
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  //입력값 변경 처리 해주는 함수
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
+  // state가 화면에 반영되기 전 연속 제출되는 경우까지 막기 위한 잠금이다.
+  const submittingRef = useRef(false);
+  const formRef = useRef(null);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((previous) => ({ ...previous, [name]: value }));
+    setErrorMessage('');
+    setErrors((previous) => ({
+      ...previous,
+      [name]: '',
+      // 원래 비밀번호가 바뀌면 확인값의 이전 오류도 다시 검사해야 한다.
+      ...(name === 'password' ? { passwordConfirm: '' } : {}),
     }));
   };
 
-  const handleJoinSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (submittingRef.current) return;
     setErrorMessage('');
 
-    console.log('회원가입 버튼이 클릭되었습니다!', formData);
+    // 서버로 전송할 DTO 필드만 명시한다. passwordConfirm은 전송하지 않는다.
+    // 비밀번호의 공백은 실제 비밀번호의 일부일 수 있으므로 trim하지 않는다.
+    const requestData = {
+      username: formData.username.trim(),
+      nickname: formData.nickname.trim(),
+      loginId: formData.loginId.trim(),
+      password: formData.password,
+      email: formData.email.trim(),
+      city: formData.city.trim(),
+      street: formData.street.trim(),
+      zipcode: formData.zipcode.trim(),
+    };
 
-    if(!formdata.username.trim() || !formData.email.trim()){
-      setErrorMessage('이름과 아이디를 입력해주세요');
+    const nextErrors = {};
+    if (!requestData.username) nextErrors.username = '이름을 입력해 주세요.';
+    if (!requestData.loginId) nextErrors.loginId = '아이디를 입력해 주세요.';
+    if (!requestData.email) {
+      nextErrors.email = '이메일을 입력해 주세요.';
+    } else if (!validateEmail(requestData.email)) {
+      nextErrors.email = '올바른 이메일 주소를 입력해 주세요.';
+    }
+    if (!requestData.password.trim()) {
+      nextErrors.password = '비밀번호를 입력해 주세요.';
+    } else if (!validatePassword(requestData.password)) {
+      nextErrors.password = '비밀번호는 8자 이상이어야 합니다.';
+    }
+    if (!formData.passwordConfirm) {
+      nextErrors.passwordConfirm = '비밀번호 확인을 입력해 주세요.';
+    } else if (requestData.password !== formData.passwordConfirm) {
+      nextErrors.passwordConfirm = '비밀번호가 일치하지 않습니다.';
+    }
+
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) {
+      // 검증 실패 시 요청을 중단하고 첫 오류 입력창으로 이동한다.
+      const firstInvalidField = Object.keys(nextErrors)[0];
+      formRef.current?.elements.namedItem(firstInvalidField)?.focus();
       return;
     }
 
-    //비밀번호 확인
-    if((formData.password!==formData.passwordConfirm)){
-        setErrorMessage('비밀번호가 일치하지 않습니다.');
-        return;
-    }
-
-    if(!validatePassword(formData.password)){
-      setErrorMessage('비밀번호는 8자 이상이어야 합니다.');
-    }
-    if(!validateEmail(formData.email)){
-      setErrorMessage('올바른 이메일 주소를 입력해주세요')
-    }
-
-
-    //  💡 passwordConfirm을 제외한 나머지 필드만 requestData로 추출
-    const { passwordConfirm, ...requestData } = formData;
-
-    console.log('실제 백엔드로 전송되는 데이터:', requestData);
-    /* 출력 결과:
-       {
-         username: 'ㅁㅁㅁ',
-         loginId: 'aaa',
-         password: '111',
-         email: 'dsfssdf@naver.com',
-         city: '서울',
-         street: '중랑구',
-         zipcode: '1919'
-       }
-    */
-
+    submittingRef.current = true;
     setIsLoading(true);
 
     try {
-      // 백엔드 컨트롤러의 join 메서드 호출
-      const response = await api.post('/api/auth/join', requestData);
-      //여기까지 왔다면 http 200ok이고 무조건 성공(success: true)상태임!
-      alert(response.data.message); // "회원가입이 완료되었습니다." 출력 (백엔드단에 있는 membercontroller에서
-                            //return ResponseEntity.ok("회원가입이 완료되었습니다.");이렇게 처리 했기 때문에 가능)
-      //회원가입 완료후 로그인 페이지로 이동
-      navigate('/login');
+      // authApi는 Axios 응답을 그대로 반환하므로 response.data가 ApiResponse다.
+      // 일반 api 인스턴스는 응답 인터셉터가 있어 반환 구조가 다르다.
+      const response = await authApi.post('/api/auth/join', requestData);
+      if (response.data?.success !== true) {
+        setErrorMessage(response.data?.message || '회원가입을 완료하지 못했습니다.');
+        return;
+      }
 
+      window.alert(response.data.message || '회원가입이 완료되었습니다.');
+      navigate('/login', { replace: true });
     } catch (error) {
-      //4xx,5xx 에러는 모두 catch로 들어옴
-      //이때 서버가 내려준 ApiResponse 객체는 error.response.data에 들어있음
-      console.error('회원가입 실패:', error);
+      // 실패해도 입력값은 보존하고 서버에서 전달한 중복 가입 등의 메시지를 표시한다.
+      setErrorMessage(
+          error.response?.data?.message || '회원가입에 실패했습니다. 잠시 후 다시 시도해 주세요.',
+      );
+    } finally {
+      submittingRef.current = false;
+      setIsLoading(false);
+    }
+  };
 
-      // 1) 백엔드 GlobalExceptionHandler가 ApiResponse.fail로 넘겨준 에러 메시지가 있는 경우
-      if (error.response?.data?.message){
-       setErrorMessage(error.response.data.message);// 서버가 전달한 에러메시지
-        } else {
-       setErrorMessage('회원가입에 실패했습니다.'); //네트워크 에러등 기본 메시지
-        }
-      } finally { setIsLoading(false); }
+  // label과 input을 id로 연결하고, 오류 설명도 해당 입력창과 연결한다.
+  const renderField = (field) => {
+    const id = `join-${field.name}`;
+    const error = errors[field.name];
 
+    return (
+        <div className={`join-page__field${field.wide ? ' join-page__field--wide' : ''}`} key={field.name}>
+          <label htmlFor={id}>
+            {field.label}
+            <span className={field.required ? 'join-page__required' : 'join-page__optional'}>
+            {field.required ? ' *' : ' (선택)'}
+          </span>
+          </label>
+          <input
+              id={id}
+              name={field.name}
+              type={field.type || 'text'}
+              value={formData[field.name]}
+              onChange={handleChange}
+              placeholder={field.placeholder}
+              autoComplete={field.autoComplete}
+              required={field.required}
+              aria-invalid={Boolean(error)}
+              aria-describedby={error ? `${id}-error` : undefined}
+          />
+          {error && <p id={`${id}-error`} className="join-page__field-error">{error}</p>}
+        </div>
+    );
   };
 
   return (
-      <>
-    <form onSubmit={handleJoinSubmit} noValidate>
-      <h2>회원가입</h2>
+      <section className="join-page" aria-labelledby="join-heading">
+        <header className="join-page__header">
+          <p className="join-page__eyebrow">WELCOME</p>
+          <h1 id="join-heading">회원가입</h1>
+          <p>기본 정보를 입력하고 새로운 이야기를 시작해 보세요.</p>
+        </header>
 
-      {/* 💡 에러 메시지가 있을 경우 화면에 빨간색으로 표시 */}
-      {errorMessage && (
-          <p style={{ color: 'red', fontWeight: 'bold' }}>{errorMessage}</p>
-      )}
+        <form ref={formRef} className="join-page__card" onSubmit={handleSubmit} noValidate aria-busy={isLoading}>
+          {/* noValidate로 브라우저 팝업 대신 위의 일관된 오류 문구를 사용한다.
+            fieldset을 비활성화하면 요청 중 모든 입력과 제출 버튼이 함께 잠긴다. */}
+          <fieldset className="join-page__fieldset" disabled={isLoading}>
+            <legend>계정 정보</legend>
+            <p className="join-page__hint">* 표시된 항목은 필수 입력입니다.</p>
+            <div className="join-page__grid">{ACCOUNT_FIELDS.map(renderField)}</div>
+          </fieldset>
 
-      <div>
-        <label>이름</label>
-        <input type="text" name="username" placeholder="이름" onChange={handleChange} required />
-      </div>
+          <fieldset className="join-page__fieldset join-page__fieldset--address" disabled={isLoading}>
+            <legend>주소 정보 <span className="join-page__optional">(선택)</span></legend>
+            <p className="join-page__hint">주소는 입력하지 않아도 가입할 수 있습니다.</p>
+            <div className="join-page__grid">{ADDRESS_FIELDS.map(renderField)}</div>
+          </fieldset>
 
-      <div>
-        <label>아이디</label>
-      <input type="text" name="loginId" placeholder="아이디" onChange={handleChange} required />
-      </div>
+          <div aria-live="polite" aria-atomic="true">
+            {Object.keys(errors).some((name) => errors[name]) && (
+                <p className="join-page__summary">입력 내용을 확인해 주세요. 각 항목 아래에 오류가 표시됩니다.</p>
+            )}
+            {errorMessage && <p className="join-page__summary" role="alert">{errorMessage}</p>}
+          </div>
 
-      <div>
-        <label>비밀번호</label>
-      <input type="password" name="password" placeholder="비밀번호" onChange={handleChange} required />
-      </div>
+          <button className="join-page__submit" type="submit" disabled={isLoading}>
+            {isLoading ? '가입 처리 중...' : '회원가입'}
+          </button>
 
-      <div>
-         <label>비밀번호 확인</label>
-      <input type="password" name="passwordConfirm" placeholder="비밀번호를 다시 입력하세요" onChange={handleChange} required />
-      </div>
-
-      <div>
-         <label>이메일</label>
-      <input type="email" name="email" placeholder="이메일" onChange={handleChange} required />
-      </div>
-
-      <div>
-        <label>도시</label>
-        <input type="text" name="city" placeholder="도시" onChange={handleChange} required />
-      </div>
-
-      <div>
-        <label>street</label>
-        <input type="text" name="street" placeholder="street" onChange={handleChange} required />
-      </div>
-
-      <div>
-        <label>우편번호</label>
-        <input type="text" name="zipcode" placeholder="우편번호" onChange={handleChange} required />
-      </div>
-
-      <button type="submit" disabled={isLoading}>
-        {isLoading ? '가입중...' : '회원가입'}
-      </button>
-    </form>
-
-    <div>
-        <Link to="/login">
-            로그인으로 돌아가기
-        </Link>
-    </div>
-      </>
+          <p className="join-page__login">이미 계정이 있으신가요? <Link to="/login">로그인</Link></p>
+        </form>
+      </section>
   );
-};
-
-export default Join;
+}

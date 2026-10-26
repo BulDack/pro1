@@ -3,6 +3,7 @@ package com.example.demo.entity.item;
 import com.example.demo.Exception.NotEnoughStockException;
 import com.example.demo.convert.ItemDetailConverter;
 import com.example.demo.entity.ItemCategory;
+import com.example.demo.entity.Member;
 import com.example.demo.entity.base.BaseEntity;
 import com.example.demo.entity.ennum.ItemStatus;
 import jakarta.persistence.*;
@@ -38,6 +39,24 @@ public class Item extends BaseEntity {
     private String description;
     private String thumbnailUrl;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name= "member_id",nullable = false)
+    private Member seller;
+
+
+    @Column(nullable = false)
+    private int likeCount;
+
+    //private ItemImage itemImage;
+    /*
+     * ItemImage에 대한 컬렉션을 선언하지 않는다.
+     *
+     * 상품에서 이미지 목록을 직접 탐색할 일이 없다면
+     * @OneToMany를 추가할 필요가 없다.
+     *
+     * 이미지 조회는 ItemImageRepository에서 처리한다.
+     */
+
     @Enumerated(EnumType.STRING)
     private ItemStatus status= ItemStatus.ACTIVE; //초기값은 활성상태
 
@@ -45,20 +64,21 @@ public class Item extends BaseEntity {
     @Column(columnDefinition = "json") //db의 json타입 사용
     //화면 노출용 자질구레한 데이터는 JSON으로 유연하게
     private ItemDetailSpec detailSpec;
-//    //@SuperBuilder나 @Builder를 사용하면 롬복이 객체를 생성할 때 우리가 직접 쓴 new ArrayList<>() 같은 초기화 식을 무시해 버립니다.
-//    // 즉, 빌더로 객체를 만들면 categoryItems는 초기값인 빈 리스트가 아니라 **null**이 들어가게 됩니다.
+////    //@SuperBuilder나 @Builder를 사용하면 롬복이 객체를 생성할 때 우리가 직접 쓴 new ArrayList<>() 같은 초기화 식을 무시해 버립니다.
+////    // 즉, 빌더로 객체를 만들면 categoryItems는 초기값인 빈 리스트가 아니라 **null**이 들어가게 됩니다.
+////    @OneToMany(mappedBy = "item")
+////    @Builder.Default // 이 어노테이션을 붙이면 초기화 식이 유지됩니다.
 //    @OneToMany(mappedBy = "item")
-//    @Builder.Default // 이 어노테이션을 붙이면 초기화 식이 유지됩니다.
-    @OneToMany(mappedBy = "item")
-    private List<ItemCategory> itemCategorys=new ArrayList<>();
+//    private List<ItemCategory> itemCategorys=new ArrayList<>();
 
     @OneToMany(mappedBy = "item",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<ItemSearchAttribute> searchAttributes=new ArrayList<>();
 
-    public void addItemCategory(ItemCategory itemCategory){
-        itemCategorys.add(itemCategory);
-        itemCategory.addItem(this);
-    }
+//    public void addItemCategory(ItemCategory itemCategory){
+//        itemCategory()
+//        itemCategorys.add(itemCategory);
+//        itemCategory.addItem(this);
+//    }
     public void addStringSearchAttribute(String key,String value){
         ItemSearchAttribute attribute=ItemSearchAttribute.createStringAttribute(this,key,value);
         this.searchAttributes.add(attribute);
@@ -68,22 +88,35 @@ public class Item extends BaseEntity {
         this.searchAttributes.add(attribute);
     }
 
-    public static Item createItem(String name,int price,int stockQuantity,ItemCategory itemCategory,String description){
-        Item item=new Item();
-        item.name=name;
-        item.price=price;
-        item.stockQuantity=stockQuantity;
-        item.description=description;
-        item.addItemCategory(itemCategory);
+    @Builder
+    public Item(String name,int price,int stockQuantity,String description,String thumbnailUrl,Member seller){
+        this.name=name;
+        this.price=price;
+        this.stockQuantity=stockQuantity;
+        this.description=description;
+        this.thumbnailUrl=thumbnailUrl;
+        this.seller=seller;
+    }
+
+    //정적 생성 메소드(위의 빌더로 대체함)
+//    public static Item createItem(String name,int price,int stockQuantity,ItemCategory itemCategory,String description){
+//        Item item=new Item();
+//        item.name=name;
+//        item.price=price;
+//        item.stockQuantity=stockQuantity;
+//        item.description=description;
+//        //item.addItemCategory(itemCategory);
 //        for(ItemCategory itemCategory:itemCategories){
 //            item.addItemCategory(itemCategory); //연관관계메서드
 //        }
-        return item;
-    }
+//        return item;
+//    }
     //업데이트 메서드들
-    public void changeItem(String name, int price) {
+    public void changeItem(String name, int price,String description,Integer stockQuantity) {
         this.name=name;
         this.price=price;
+        this.description=description;
+        this.stockQuantity=stockQuantity;
     }
 
     public void updateAttributes(List<ItemSearchAttribute>newAttributes){

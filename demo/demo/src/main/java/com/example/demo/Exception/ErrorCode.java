@@ -16,7 +16,19 @@ public enum ErrorCode {
     // Auth & JWT (인증/인가 관련 에러)
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "A001", "유효하지 않거나 서명이 일치하지 않는 Refresh Token입니다."),
     EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "A002", "만료된 Refresh Token입니다. 다시 로그인 해주세요."),
-    REFRESH_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "A003", "Refresh Token을 찾을 수 없습니다."),
+    /*
+     * Refresh Token이 없거나 유효하지 않은 경우
+     *
+     * 404 NOT_FOUND:
+     *   요청한 리소스가 존재하지 않는다는 의미
+     *
+     * 401 UNAUTHORIZED:
+     *   유효한 인증 정보가 없다는 의미
+     *
+     * Refresh Token이 없으면 새로운 Access Token을
+     * 발급할 수 없으므로 401이 더 적절하다.
+     */
+    REFRESH_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, "A003","Refresh Token이 없습니다."),
     TOKEN_TAMPERED(HttpStatus.UNAUTHORIZED, "A004", "토큰이 변조되었거나 탈취 시도가 감지되었습니다."),
     UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "A005", "접근 권한이 없습니다."),
 

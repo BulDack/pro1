@@ -47,19 +47,19 @@ export const getPost = async (postId,config={}) => {
 };
 
 export const createPost = async (data) => {
-    const response = await api.post(API, data);
-
-    return response.data;
+    return await api.post(API, data);
 };
 
-export const updatePost = async (id, data) => {
-    await api.put(`${API}/${id}`, data);
+export const updatePost = async (postId,data) => {
+    await api.patch(`/api/posts/${postId}/edit`,data);
 };
 
-export const deletePost = async (id) => {
-    await api.delete(`${API}/${id}`);
+export const deletePost = async (postId) => {
+    await api.delete(`/api/posts/${postId}`);
 };
 
+
+////좋아요
 export const likePost= async(postId)=>{
     await api.post(`/api/posts/${postId}/likes`);
 
@@ -69,4 +69,49 @@ export const unlikePost= async(postId)=>{
     await api.delete(`/api/posts/${postId}/unlikes`);
 
 }
+
+////댓글
+
+export const getComment= async (postId,page = 0, sort = "LATEST") => {
+    const response = await api.get(`/api/posts/${postId}/comments`, {
+        params: {
+            page,
+            size: 10,
+            sort
+        }
+    });
+
+    return response.data;
+}
+
+export const createComment= async(postId,data)=>{
+
+    /*
+     * postId: 댓글이 속할 게시글 ID
+     * data: 댓글 작성 데이터
+     *
+     * 예:
+     * postId = 15
+     * data = { content: "안녕하세요" }
+     */
+
+    if (postId == null || postId === "") {
+        throw new Error("게시글 ID가 없습니다.");
+    }
+
+    // 서버로 댓글 생성 요청
+    return await api.post(
+        `/api/posts/${postId}/comments`,
+        data
+    );
+
+}
+
+export const deleteComment= async(postId,commentId)=>{
+
+    await api.delete(`/api/posts/${postId}/comments/${commentId}`);
+
+}
+
+
 

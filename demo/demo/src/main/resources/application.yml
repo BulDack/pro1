@@ -1,9 +1,17 @@
+app:
+  upload:
+    dir: C:/Users/bfbas/IdeaProjects/pro1/demo/demo/uploads
+
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/luna1
     username: root
     password: test1234
     driver-class-name: com.mysql.cj.jdbc.Driver
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 25MB
 
   jpa:
     hibernate:

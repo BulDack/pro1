@@ -1,0 +1,170 @@
+/* 기존 게시글 화면의 카드, 테두리, 파란색 버튼을 이어 사용한다.
+   모든 스타일을 join-page 내부로 제한해 다른 화면에 영향을 주지 않는다. */
+.join-page {
+    box-sizing: border-box;
+    width: min(1080px, 100%);
+    min-height: 100svh;
+    margin: 0 auto;
+    padding: 48px 24px 64px;
+    color: #1e293b;
+    text-align: left;
+}
+
+.join-page *,
+.join-page *::before,
+.join-page *::after { box-sizing: border-box; }
+
+.join-page .join-page__header { margin-bottom: 36px; }
+.join-page .join-page__eyebrow {
+    margin: 0 0 10px;
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+.join-page .join-page__header h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -1px;
+}
+.join-page .join-page__header > p:last-child {
+    margin: 12px 0 0;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.7;
+}
+.join-page .join-page__card {
+    padding: 48px;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 4px 20px rgb(15 23 42 / 3%);
+}
+.join-page .join-page__fieldset {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+.join-page .join-page__fieldset legend {
+    padding: 0;
+    color: #0f172a;
+    font-size: 20px;
+    font-weight: 700;
+}
+.join-page .join-page__fieldset--address {
+    margin-top: 44px;
+    padding-top: 12px;
+}
+.join-page .join-page__hint {
+    margin: 12px 0 28px;
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* 넓은 화면은 2열, 모바일은 1열로 자연스럽게 배치한다. */
+.join-page .join-page__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px 28px;
+}
+.join-page .join-page__field { min-width: 0; }
+.join-page .join-page__field--wide { grid-column: 1 / -1; }
+.join-page .join-page__field label {
+    display: block;
+    margin-bottom: 12px;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 600;
+}
+.join-page .join-page__required { color: #2563eb; }
+.join-page .join-page__optional {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 400;
+}
+.join-page .join-page__field input {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: 56px;
+    padding: 0 16px;
+    border: 1px solid #dbe2ea;
+    border-radius: 8px;
+    background: #fff;
+    color: #1e293b;
+    font: inherit;
+    font-size: 15px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+.join-page .join-page__field input::placeholder { color: #94a3b8; }
+.join-page .join-page__field input:focus {
+    border-color: #2563eb;
+    outline: none;
+    box-shadow: 0 0 0 3px rgb(37 99 235 / 10%);
+}
+.join-page .join-page__field input[aria-invalid='true'] { border-color: #dc2626; }
+.join-page .join-page__field input:disabled { background: #f8fafc; color: #64748b; }
+.join-page .join-page__field-error {
+    margin: 7px 0 0;
+    color: #b91c1c;
+    font-size: 12px;
+    line-height: 1.6;
+}
+.join-page .join-page__summary {
+    margin: 24px 0 0;
+    padding: 12px 14px;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    background: #fef2f2;
+    color: #b91c1c;
+    font-size: 13px;
+    line-height: 1.7;
+}
+.join-page .join-page__submit {
+    width: 100%;
+    min-height: 56px;
+    margin-top: 40px;
+    padding: 12px 20px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: #2563eb;
+    color: #fff;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.join-page .join-page__submit:hover:not(:disabled) { background: #1d4ed8; }
+.join-page .join-page__submit:disabled { opacity: 0.55; cursor: not-allowed; }
+.join-page .join-page__submit:focus-visible,
+.join-page .join-page__login a:focus-visible {
+    outline: 3px solid #93c5fd;
+    outline-offset: 3px;
+}
+.join-page .join-page__login {
+    margin: 22px 0 0;
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.8;
+    text-align: center;
+}
+.join-page .join-page__login a {
+    margin-left: 8px;
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+}
+.join-page .join-page__login a:hover { text-decoration: underline; }
+
+@media (max-width: 640px) {
+    .join-page { padding: 28px 16px 40px; }
+    .join-page .join-page__header h1 { font-size: 26px; }
+    .join-page .join-page__card { padding: 24px 20px; }
+    .join-page .join-page__grid { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+    .join-page .join-page__fieldset--address { margin-top: 32px; }
+    .join-page .join-page__field input { height: 52px; }
+}

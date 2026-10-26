@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.config.JwtTokenProvider;
 import com.example.demo.dto.JoinRequestDto;
 import com.example.demo.dto.login.LoginDto;
+import com.example.demo.dto.login.MypageDto;
 import com.example.demo.entity.Address;
 import com.example.demo.entity.Member;
 import com.example.demo.entity.RefreshToken;
@@ -20,6 +21,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+
+import static com.example.demo.dto.my.MyResponse.MemberResponse;
+
+
 
 @Service
 @Transactional(readOnly = true)
@@ -165,4 +170,13 @@ public class MemberService {
     }
 
 
+    public MemberResponse getMe(Long memberId) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("회원을 찾을 수 없습니다.")
+                );
+
+        return new MemberResponse(member.getNickname());//이거 아직 안함
+    }
 }

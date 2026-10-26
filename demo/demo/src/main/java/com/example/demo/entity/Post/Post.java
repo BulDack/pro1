@@ -28,10 +28,10 @@ public class Post extends BaseEntity {
     private String content;
 
     @Column(nullable = false)
-    private Long viewCount;//조회수
+    private long viewCount;//조회수
 
     @Column(nullable = false)
-    private Long likeCount;// 좋아요 수
+    private long likeCount;// 좋아요 수
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name= "member_id",nullable = false)
@@ -52,6 +52,8 @@ public class Post extends BaseEntity {
         this.title=title;
         this.content=content;
         this.member=member;
+        this.viewCount=0;
+        this.likeCount=0;
     }
 
     public void update(String title,String content){

@@ -19,16 +19,18 @@ public interface CategoryRepository extends JpaRepository<Category,Long> {
     //3.카테고리 이름 중복 확인(생성/수정시 검증용)
     boolean existsByName(String name);
 
-    //n+1문제 해결 (findByParentIsNull()로 최상위 카테고리를 가져온 뒤 DTO로 변환하면, 자식 카테고리를 로딩할 때마다 추가 쿼리가 나가는 N+1 문제가 발생,
-    //이를 해결하기 위해 한번의 쿼리로전체 카테고리와 자식 연관관계를 한꺼번에 끌어옴)
-    @Query("select distinct c from Category c " + "left join fetch c.children " + "where c.parent is null " + "order by c.id asc")
-    List<Category> findAllWithChildren();
+    Optional<Category>findById(Long Id);
 
-    //여기도 n+1문제 해결위해 jpql써서 한번에 가져옴
-    @Query("select distinct c from Category c " +
-            "left join fetch c.children " +
-            "where c.id = :categoryId")
-    Optional<Category> findByIdWithChildren(@Param("categoryId") Long categoryId);
+//    //n+1문제 해결 (findByParentIsNull()로 최상위 카테고리를 가져온 뒤 DTO로 변환하면, 자식 카테고리를 로딩할 때마다 추가 쿼리가 나가는 N+1 문제가 발생,
+//    //이를 해결하기 위해 한번의 쿼리로전체 카테고리와 자식 연관관계를 한꺼번에 끌어옴)
+//    @Query("select distinct c from Category c " + "left join fetch c.children " + "where c.parent is null " + "order by c.id asc")
+//    List<Category> findAllWithChildren();
+
+//    //여기도 n+1문제 해결위해 jpql써서 한번에 가져옴
+//    @Query("select distinct c from Category c " +
+//            "left join fetch c.children " +
+//            "where c.id = :categoryId")
+//    Optional<Category> findByIdWithChildren(@Param("categoryId") Long categoryId);
 
     //이런식으로 querydsl을 사용해서 할수 있음
     //// 1. Custom 인터페이스

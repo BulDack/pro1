@@ -35,6 +35,7 @@ public class PostLikeService {
                 .build();
 
         postLikeRepository.save(postLike);
+        postRepository.increaseLikeCount(postId);
     }
 
     public void unlike(Long postId,Long memberId){
@@ -45,7 +46,7 @@ public class PostLikeService {
 
 
 
-
         postLikeRepository.delete(postLike);
+        postRepository.decreaseLikeCount(postId);
     }
 }//postLikeRepository.deleteLike(postId,memberId);

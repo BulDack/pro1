@@ -56,24 +56,24 @@ public class CategoryService {
     /**
      * 특정 카테고리 ID를 받아 자기 자신 + 모든 하위 카테고리 ID 목록을 반환
      */
-    public List<Long>getSelfAndSubCategoryIds(Long categoryId){
-        if(categoryId==null){
-            return Collections.emptyList();
-        }
-
-        //1.대상 카테고리 조회(fetch조인으로 자식 카테고리 까지 한번에 가져왓음)
-        Category category=categoryRepository.findByIdWithChildren(categoryId).orElseThrow(
-                ()->new EntityNotFoundException("존재하지 않는 카데고리 입니다.")
-        );
-
-        Set<Long>allCategoryIds=new HashSet<>();
-
-        //2.재귀함수를 통해 모든 자식 id수집
-        traverseCategoryIds(category,allCategoryIds);
-
-        return new ArrayList<>(allCategoryIds);
-
-    }
+//    public List<Long>getSelfAndSubCategoryIds(Long categoryId){
+//        if(categoryId==null){
+//            return Collections.emptyList();
+//        }
+//
+//        //1.대상 카테고리 조회(fetch조인으로 자식 카테고리 까지 한번에 가져왓음)
+//        Category category=categoryRepository.findByIdWithChildren(categoryId).orElseThrow(
+//                ()->new EntityNotFoundException("존재하지 않는 카데고리 입니다.")
+//        );
+//
+//        Set<Long>allCategoryIds=new HashSet<>();
+//
+//        //2.재귀함수를 통해 모든 자식 id수집
+//        traverseCategoryIds(category,allCategoryIds);
+//
+//        return new ArrayList<>(allCategoryIds);
+//
+//    }
 
 //이거 아직안함
 //    // 카테고리 트리는 캐싱을 적용하기 딱 좋은 대상!
@@ -83,16 +83,16 @@ public class CategoryService {
 //    }
 
 
-    // 재귀적으로 자식 카테고리 ID들을 수집하는 헬퍼 메서드
-    private void traverseCategoryIds(Category category, Set<Long> idSet) {
-
-        idSet.add(category.getId()); //현재 카테고리 id추가
-
-        for (Category child: category.getChildren()){
-            traverseCategoryIds(child,idSet); //자식노드로 이동
-        }
-
-    }
+//    // 재귀적으로 자식 카테고리 ID들을 수집하는 헬퍼 메서드
+//    private void traverseCategoryIds(Category category, Set<Long> idSet) {
+//
+//        idSet.add(category.getId()); //현재 카테고리 id추가
+//
+//        for (Category child: category.getChildren()){
+//            traverseCategoryIds(child,idSet); //자식노드로 이동
+//        }
+//
+//    }
 
 
 }

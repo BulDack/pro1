@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import {refreshAccessToken} from '@/services/api';
 import {loginApi,logoutApi} from "@/api/authApi.js";
+import {getMyInfo} from "@/api/memberApi.js";
 
 const AuthContext = createContext(null); //전체 공유할 context생성
 
@@ -8,6 +9,7 @@ export const AuthProvider = ({children}) =>{
 
     // 📌 [역할 1] 전역 인증 상태 관리 (JS 메모리 보관)
     const [accessToken,setAccessToken] = useState(null);
+    const [user,setUser]= useState(null);
     const [isLoading, setIsLoading] =useState(true);
 
     // -------------------------------------------------------------
@@ -16,7 +18,9 @@ export const AuthProvider = ({children}) =>{
     //로그인 함수
     const login =async (loginId,password) =>{
         const data= await loginApi(loginId,password);
+        const member = await getMyInfo(data.accessToken);
         setAccessToken(data.accessToken); //성공시 메모리에 토큰 저장
+        setUser(member);
         return data;
     };
 
@@ -26,6 +30,7 @@ export const AuthProvider = ({children}) =>{
             await logoutApi(); //백엔드 쿠키만료 요청
         }finally {
             setAccessToken(null); //메모리 토큰 삭제
+            setUser(null);
         }
     };
 
@@ -41,10 +46,13 @@ export const AuthProvider = ({children}) =>{
     * 새로운 Access Token을 발급받아 복원한다.
     *
     * 함수도 객체이기때문에 react컴포넌트가 다시 렌더링되면 객체도 새롭게 다시 생김
+    * 자바 스크립트 함수는 실행될때마다 독립된 렉시컬 환경과 클로저를 형성함.!!!
+    * useEffect가 또 새롭게 호출되면 새로운 메모리공간에 새로운 let active=true;가 다시 만들어짐
+    * 따라서 항상 새로운 값으로 비동기 작업을 할수 있음.
     */
     useEffect(() => {
 
-        let active = true;
+        let active = true; //비동기 응답이 늦게 도착했을때 이미 필요없는 작업이 되엇으면 굳이 실행시켜주지 않기(Effect의 상태 변경을 막기) 위한 장치
 
         const initializeAuth = async () => {
             try {
@@ -54,7 +62,8 @@ export const AuthProvider = ({children}) =>{
                  *
                  * 성공하면 새 Access Token을 반환한다.
                  */
-                const token = await refreshAccessToken();
+                const token = await refreshAccessToken(); //얘도 api.js에 있음
+                const member = await getMyInfo();
 
                 /*
                  * AuthProvider가 아직 유지되는 경우에만
@@ -62,6 +71,7 @@ export const AuthProvider = ({children}) =>{
                  */
                 if (active) {
                     setAccessToken(token);
+                    setUser(member);
                 }
 
             } catch (error) {
@@ -75,12 +85,14 @@ export const AuthProvider = ({children}) =>{
                  */
                 if (active) {
                     setAccessToken(null);
+                    setUser(null);
                 }
 
             } finally {
 
                 /*
                  * 인증 상태 복원이 끝나면 로딩 종료
+                 *
                  */
                 if (active) {
                     setIsLoading(false);
@@ -92,7 +104,7 @@ export const AuthProvider = ({children}) =>{
 
         /*
          * 컴포넌트가 언마운트(컴포넌트가 화면에서 완전히 사라지는 순간=다른페이지로 이동해서 기존 컴포넌트가 화면에서 치워질때)된 뒤 응답이 도착하는 경우 상태 변경을 방지한다.
-         * 언마운트 됐을때 useEffect안에서 return해준 정리(cleanUp)함수가 실행됨
+         * 언마운트 됐을때 useEffect안에서 return해준 정리(cleanUp)함수가 실행됨(AuthContext는 제일 바깥에 잇어서 단순히 페이지를 옯기는 경우에는 렌더링이 새롭게 일어나지 않아서 해당안됨)
          */
         return () => {
             active = false;
@@ -118,10 +130,11 @@ export const AuthProvider = ({children}) =>{
         <AuthContext.Provider
             value={{
                 accessToken,
+                user,
                 isLoading,
                 login,
                 logout,
-                updateToken: setAccessToken,
+                updateToken: setAccessToken, //setAccessToken을 updateToken이름으로 제공
             }}
         >
             {children}

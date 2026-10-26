@@ -113,12 +113,6 @@ public class PostDto {
 
     }
 
-    public record commentDto(
-      @NotBlank(message = "댓글내용은 공백일수 없습니다.")
-      @Size(max=500,message = "댓글은 500자 이내로만 작성해주세요.")
-      String content
-    ){}
-
     public record searchRequestDto(
             @NotBlank(message = "검색내용은 공백일수 없습니다.")
             String title,

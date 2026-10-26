@@ -1,4 +1,4 @@
-package com.example.demo.service;
+package com.example.demo.service.order;
 
 import com.example.demo.dto.CartItemDto;
 import com.example.demo.dto.OrderDto;
@@ -7,7 +7,7 @@ import com.example.demo.entity.ennum.DeliveryStatus;
 import com.example.demo.entity.item.CartItem;
 import com.example.demo.entity.item.Item;
 import com.example.demo.repository.order.CartItemRepository;
-import com.example.demo.repository.ItemRepository;
+import com.example.demo.repository.item.ItemRepository;
 import com.example.demo.repository.MemberRepository;
 import com.example.demo.repository.order.OrderRepository;
 import lombok.RequiredArgsConstructor;

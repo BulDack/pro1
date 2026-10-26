@@ -79,6 +79,9 @@ export const AxiosAuthInterceptor = ({ children }) => {
      * 만약 useEffect 없이 컴포넌트 본문 안에서 바로 injectAuthStore를 호출했다면, 컴포넌트가 렌더링될 때마다 매번 불필요하게 인터셉터 설정이 새로 등록되는 부하가 생길 수 있음.
      * 이를 방지하고 최초 마운트 시점에 딱 알맞게 초기화하는 안전장치 역할
      */
+
+    //부모 컴포넌트인 AuthContext가 리렌더링되서 자식 컴포넌트인 AxiosAuthInterceptor가 리렌더링 되더라도
+    //useEffect는 자기가 실행할 조건인 의존성 배열만을 보고 실행 여부를 판단함(그래서 단순히 리렌더링 됐다고 실행되는것이 아니라 무시되거나 스킵됨)
     useEffect(() => {
 
         /*
@@ -106,6 +109,7 @@ export const AxiosAuthInterceptor = ({ children }) => {
          * updateAccessTokenInMemory = setToken
          */
         injectAuthStore(getToken, setToken);//이녀석이 api.js에 잇는 함수
+        //각페이지들에선 api.js에서 설정해놓은 api를 쓰니까 이걸로 api.js에 값을 넘겨줘서 그걸 바탕으로 설정
 
     }, [updateToken]);
     //함수도 객체!컴포넌트가 리렌더링 되면 함수자체가 메모리상에서 새로만들어져 참조주소가 바뀌므로 함수가 변경되는거라 할수 잇음,

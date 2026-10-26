@@ -10,7 +10,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 )
 @JsonSubTypes({
         @JsonSubTypes.Type(value=ClothingDetail.class,name="CLOTHING"),
-        @JsonSubTypes.Type(value=ElectronicsDetail.class,name="ELECTRONICS")
+        @JsonSubTypes.Type(value=ElectronicsDetail.class,name="ELECTRONICS"),
+        @JsonSubTypes.Type(value= FoodDetailSpec.class,name="FOODS")
 })
 public abstract class ItemDetailSpec {
     //공통 비핵심 정보

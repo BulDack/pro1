@@ -20,6 +20,7 @@ import static com.example.demo.dto.PostDto.updateRequestDto;
 import static com.example.demo.dto.PostDto.postListResponse;
 import static com.example.demo.dto.PostDto.searchRequestDto;
 import static com.example.demo.dto.PostDto.postDetailResponse;
+import static com.example.demo.dto.my.MyResponse.PostResponse;
 
 //실무에서는 보통 이렇게 나눔
 //상황	            방식
@@ -82,7 +83,7 @@ public class PostController {
     }
 
     //게시물 수정
-    @PatchMapping("/{postId}")
+    @PatchMapping("/{postId}/edit")
     public ResponseEntity<Void>updatePost(
             @PathVariable Long postId,
             @Valid @RequestBody updateRequestDto request,
@@ -103,45 +104,10 @@ public class PostController {
         return ResponseEntity.ok().build();
     }
 
-
-    //로그인한 사용자 글 리스트 가져오기()
-    @GetMapping("/my")
-    public ApiResponse<Page<postListResponse>> getMypost(@AuthenticationPrincipal PrincipalDetails userDetails,
-                                         @PageableDefault(size = 10) Pageable pageable
-    ){
-
-        Page<postListResponse> result = postService.getMyPost(userDetails.getId(),pageable);
-
-        return ApiResponse.success("내 페이지를 불러 옵니다.",result);
-
-
         // 만약 성능이 걱정된다면? (Fetch Join)
         //나중에 게시글이 많아지고, 게시글 목록 화면에서 작성자의 이름까지 출력해야 한다면 N+1 문제가 발생할 수 있음
         // 그때는 리포지토리에 @Query를 사용해 한 번에 긁어오는 것이 좋음.
         // fetch join을 사용해 멤버 정보까지 한 번의 쿼리로 가져오기
         //@Query("select a from Article a join fetch a.member where a.member.id = :id")
         //List<Article> findAllByMemberId(@Param("id") Long id);
-    }
-
-//    //좋아요 누르기 api
-//    @PostMapping("/{id}/likes")
-//    public void likePost(
-//            @PathVariable Long id,
-//            @AuthenticationPrincipal PrincipalDetails userDetails
-//    )
-//    {
-//        postLikeService.addLike(id,userDetails.getId());
-//    }
-//
-//    //좋아요 취소(좋아요를 한번 더눌러서)
-//    @DeleteMapping("/{id}/likes")
-//    public void unlikePost(
-//            @PathVariable Long id,
-//            @AuthenticationPrincipal PrincipalDetails userDetails
-//    )
-//    {
-//        postLikeService.unlike(id,userDetails.getId());
-//    }
-
-
 }

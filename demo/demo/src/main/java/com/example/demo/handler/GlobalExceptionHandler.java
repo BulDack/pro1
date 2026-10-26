@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     //1.비즈니스 로직 예외 처리
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiResponse<Void>>handleIllegalArgumentException(IllegalArgumentException e){
-        //여기서 ApiResponse.fail()를 호출해서 응답을 만듬
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.fail(e.getMessage()));
-    }
+//    @ExceptionHandler(IllegalArgumentException.class)
+//    public ResponseEntity<ApiResponse<Void>>handleIllegalArgumentException(IllegalArgumentException e){
+//        //여기서 ApiResponse.fail()를 호출해서 응답을 만듬
+//        return ResponseEntity
+//                .status(HttpStatus.BAD_REQUEST)
+//                .body(ApiResponse.fail(e.getMessage()));
+//    }
 
     //2.@valid 유효성 검사 실패 처리(예: 이메일 형식오류,필수값 누락)
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -49,9 +49,14 @@ public class GlobalExceptionHandler {
 
     //4.. 기타서버 내부 알 수 없는 에러(500 server Error)
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>>handlAllException(Exception e){
+    public ResponseEntity<ApiResponse<Void>> handlAllException(Exception e) {
+        // 예외 메시지와 발생 위치를 서버 콘솔에 기록한다.
+        log.error("처리되지 않은 서버 오류", e);
+
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.fail("서버 내부 오류가 발생했습니다."));
     }
+
+
 }

@@ -12,6 +12,7 @@ import {router} from './routes';//import 경로를 ./routes로만 지정하면, 
 
 // 2. 뼈대 컴포넌트
 // 부모컴포넌트는 자식컴포넌트를 감싸고,자식 컴포넌트는 부모가 제공하는 Context를 사용할 수 있음.
+//부모 컴포넌트가 리렌더링 되면 자식도 강제로 자동으로 리렌더링됨,그반대는 아님!
 // 따라서 RouterProvider 내부에서 렌더링되는 MyPage, MainPage 등은 모두 AuthProvider의 인증 상태를 사용할 수 있는 것
 function App() {
   return (

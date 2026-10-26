@@ -201,9 +201,9 @@ const baseConfig={
     // 5초 이상 요청이 완료되지 않으면 timeout 발생
     timeout: 5000,
 
-    headers: { // ✅ 매번 인터셉터에서 넣지 않고, 기본값으로 고정합니다.
-        'Content-Type': 'application/json'
-    }
+    // headers: { // ✅ 매번 인터셉터에서 넣지 않고, 기본값으로 고정합니다.
+    //     'Content-Type': 'application/json'
+    // }
 }
 
 /*
@@ -236,9 +236,24 @@ const api = axios.create(baseConfig);
 //  api.get(),post()등등과 같은 요청이 실행되면 Axios가 내부적으로 등록해둔 인터셉터를 확인해서 실행
 api.interceptors.request.use(
     //요청이 성공적으로 보내지기전에 실행되는 콜백함수
-  (config) => {
-      //config객체:Axios가 백엔드로 보낼 요청정보(url,method,headers등)가 들어있는 설정 객체
+  (config) => {//config객체:Axios가 백엔드로 보낼 요청정보(url,method,headers등)가 들어있는 설정 객체
 
+      /*
+         * 호출자가 AccessToken토큰을 직접 지정했다면 그대로 사용한다.(authContext에서)
+         *
+         * 예:
+         * getMyInfo(방금_발급받은_토큰)
+         * React 메모리에 이전 토큰이 남아 있어도
+         * 직접 지정한 새 토큰을 덮어쓰지 않는다.
+         */
+      if(config.headers.has('Authorization')){
+          return config;
+      }
+
+        /*
+         * 직접 지정한 인증 헤더가 없는 일반 요청은
+         * 기존 방식대로 메모리의 토큰을 사용한다.
+         */
       // 만약 토큰이 존재한다면, 백엔드로 전달될 HTTP Request Header에 Authorization 항목을 추가
     const token = getAccessTokenFromMemory ? getAccessTokenFromMemory() : null;
       // 토큰이 없으면 인증 헤더를 제거한다.

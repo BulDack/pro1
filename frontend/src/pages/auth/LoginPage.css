@@ -1,0 +1,102 @@
+/* 로그인 화면에만 적용한다. 기존 메인 화면의 크림·주황색을 이어 사용한다. */
+.login-page {
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100svh;
+    padding: 48px 20px;
+    color: #352e29;
+    background: radial-gradient(ellipse at 20% 10%, #ffecd9 0, transparent 50%),
+                linear-gradient(135deg, #fffcf6, #f8f7f3);
+    line-height: 1.6;
+}
+.login-page *, .login-page *::before, .login-page *::after { box-sizing: border-box; }
+.login-page .login-page__card {
+    width: min(460px, 100%);
+    min-width: 0;
+    padding: 38px 36px 28px;
+    border: 1px solid #eee2d5;
+    border-radius: 26px;
+    background: #fff;
+    box-shadow: 0 16px 60px #59331b0a, 0 2px 8px #59331b04;
+}
+.login-page .login-page__header { text-align: center; }
+.login-page .login-page__brand {
+    display: inline-block;
+    padding: 5px 0;
+    color: #ad4326;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2.4px;
+    text-decoration: none;
+}
+.login-page .login-page__welcome-icon {
+    display: grid;
+    place-items: center;
+    width: 60px;
+    height: 60px;
+    margin: 24px auto 18px;
+    border: 1px solid #f1dbc6;
+    border-radius: 20px;
+    background: #fff4e6;
+    color: #b74827;
+}
+.login-page .login-page__welcome-icon svg { width: 29px; height: 29px; }
+.login-page .login-page__header h1 { margin: 0; font-size: clamp(23px, 5vw, 28px); font-weight: 750; letter-spacing: -1px; line-height: 1.35; }
+.login-page .login-page__header p { margin: 11px 0 28px; color: #766b62; font-size: 13px; word-break: keep-all; }
+.login-page .login-page__form { display: grid; gap: 19px; }
+.login-page .login-page__field { min-width: 0; }
+.login-page .login-page__field label { display: block; margin-bottom: 8px; color: #4d4036; font-size: 13px; font-weight: 700; }
+.login-page .login-page__input-wrap { position: relative; }
+/* 아이콘은 입력을 가로채지 않으며, 입력칸의 왼쪽 패딩으로 글자와 겹치지 않게 한다. */
+.login-page .login-page__input-wrap > svg { position: absolute; left: 15px; top: 50%; width: 19px; height: 19px; transform: translateY(-50%); color: #938174; pointer-events: none; }
+.login-page .login-page__input-wrap input {
+    display: block;
+    width: 100%; min-width: 0; min-height: 52px;
+    margin: 0; padding: 13px 15px 13px 44px;
+    border: 1px solid #dfd6cc;
+    border-radius: 12px;
+    background: #fffcf9;
+    color: #352e29;
+    font: inherit; font-size: 16px;
+    transition: border-color .18s ease, background-color .18s ease;
+}
+.login-page .login-page__input-wrap input::placeholder { color: #81766c; font-size: 13px; }
+.login-page .login-page__input-wrap input:focus { border-color: #b74827; background: #fff; }
+.login-page .login-page__input-wrap:focus-within > svg { color: #b74827; }
+.login-page .login-page__error { margin: 0 0 20px; padding: 12px 14px; border: 1px solid #f0c7b7; border-radius: 12px; background: #fff2ec; color: #a13720; font-size: 13px; overflow-wrap: anywhere; }
+.login-page .login-page__submit {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; min-height: 52px; margin-top: 5px; padding: 13px 20px;
+    border: 1px solid #b74827; border-radius: 12px;
+    background: #b74827; color: #fff;
+    font: inherit; font-size: 15px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 5px 14px #b748271a;
+    transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.login-page .login-page__submit > svg { width: 19px; height: 19px; }
+.login-page .login-page__submit:disabled { background: #92523d; border-color: #92523d; cursor: wait; box-shadow: none; }
+.login-page .login-page__join { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; margin-top: 28px; padding-top: 20px; border-top: 1px solid #eee6dd; }
+.login-page .login-page__join p { margin: 0; color: #766b62; font-size: 12px; }
+.login-page .login-page__join a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 5px 0; color: #a63d20; font-size: 13px; font-weight: 700; text-decoration: none; }
+.login-page .login-page__home { display: flex; align-items: center; justify-content: center; gap: 8px; width: fit-content; min-height: 44px; margin: 14px auto 0; padding: 5px 10px; color: #766b62; font-size: 12px; text-decoration: none; }
+/* 키보드 포커스를 모든 조작 요소에서 보여준다. */
+.login-page :is(a, button, input):focus-visible { outline: 3px solid #ab4325; outline-offset: 4px; }
+.login-page .login-page__spinner { width: 17px; height: 17px; border: 2px solid #ffffff66; border-top-color: #fff; border-radius: 50%; animation: login-page-spin .8s linear infinite; }
+@keyframes login-page-spin { to { transform: rotate(360deg); } }
+.login-page .login-page__sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+@media (hover: hover) {
+    .login-page .login-page__submit:hover:not(:disabled) { background: #9e3b1f; transform: translateY(-1px); box-shadow: 0 8px 18px #b7482724; }
+    .login-page .login-page__join a:hover, .login-page .login-page__home:hover { text-decoration: underline; text-underline-offset: 4px; }
+}
+@media (max-width: 480px) {
+    .login-page { padding: 24px 16px; }
+    .login-page .login-page__card { padding: 30px 22px 22px; border-radius: 22px; }
+}
+/* 움직임 감소 설정에서도 로딩 문구는 그대로 표시된다. */
+@media (prefers-reduced-motion: reduce) {
+    .login-page *, .login-page *::before, .login-page *::after { animation: none; transition: none; }
+    .login-page .login-page__submit:hover:not(:disabled) { transform: none; }
+}

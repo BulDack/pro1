@@ -19,6 +19,8 @@ public class Category {
     @Column(name="category_id")
     private Long id;
 
+    // 카테고리 이름 (예: 전자제품, 노트북)
+    @Column(nullable = false, length = 100)
     private String name;
 
     // 1. 부모 카테고리 (상위) -> N:1 관계
@@ -27,15 +29,15 @@ public class Category {
     private Category parent;
 
     // 2. 자식 카테고리들 (하위) -> 1:N 관계
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
-    private List<Category> children= new ArrayList<>();
-
-
-    // 연관관계 편의 메서드
-    public void addChildCategory(Category child){
-        this.children.add(child);
-        child.setParent(this);
-    }
+//    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+//    private List<Category> children= new ArrayList<>();
+//
+//
+//    // 연관관계 편의 메서드
+//    public void addChildCategory(Category child){
+//        this.children.add(child);
+//        child.setParent(this);
+//    }
     private void setParent(Category parent){
         this.parent=parent;
     }

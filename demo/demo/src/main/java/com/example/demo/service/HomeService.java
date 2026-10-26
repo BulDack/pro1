@@ -4,10 +4,8 @@ package com.example.demo.service;
 import com.example.demo.dto.home.HomeResponse;
 import com.example.demo.dto.home.ItemSummaryResponse;
 import com.example.demo.dto.home.PostSummaryResponse;
-import com.example.demo.repository.ItemQueryRepository;
-import com.example.demo.repository.ItemRepository;
+import com.example.demo.repository.item.ItemQueryRepository;
 import com.example.demo.repository.post.PostQueryRepository;
-import com.example.demo.repository.post.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
